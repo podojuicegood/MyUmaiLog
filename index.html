@@ -284,11 +284,23 @@
       background: #fcfcfb;
     }
 
+    .pane-editor {
+      background: #fff;
+    }
+
+    .editor-input-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card-bg);
+      padding: 8px;
+    }
+
     textarea {
       min-height: 360px;
       resize: vertical;
       border-radius: 10px;
       line-height: 1.55;
+      margin: 0;
     }
 
     .preview {
@@ -480,7 +492,7 @@
         </div>
 
         <div class="editor-body">
-          <div class="pane">
+          <div class="pane pane-editor">
             <div class="label">내용</div>
             <div id="chatComposer" style="display:none; gap:8px; margin-bottom:8px;">
               <div class="row">
@@ -492,11 +504,14 @@
                 <button id="addChatBtn" type="button">대화 추가</button>
               </div>
               <div class="row">
+                <button id="cancelEditChatBtn" type="button" class="ghost">수정 취소</button>
                 <button id="clearChatBtn" type="button" class="ghost">대화 전체 삭제</button>
               </div>
-              <div id="chatList" class="preview" style="min-height:120px;"></div>
+              <div id="chatList" class="preview editor-input-card" style="min-height:120px; margin-top:10px;"></div>
             </div>
-            <textarea id="content" placeholder="내용을 입력하세요."></textarea>
+            <div class="editor-input-card">
+              <textarea id="content" placeholder="내용을 입력하세요."></textarea>
+            </div>
           </div>
           <div class="pane">
             <div class="label">미리보기</div>
@@ -542,6 +557,7 @@
       chatSide: document.getElementById("chatSide"),
       chatInput: document.getElementById("chatInput"),
       addChatBtn: document.getElementById("addChatBtn"),
+      cancelEditChatBtn: document.getElementById("cancelEditChatBtn"),
       clearChatBtn: document.getElementById("clearChatBtn"),
       chatList: document.getElementById("chatList"),
       moveTargetFolder: document.getElementById("moveTargetFolder"),
@@ -556,7 +572,8 @@
       selectedId: null,
       data: loadData(),
       ui: loadUiState(),
-      themePresets: loadThemePresets()
+      themePresets: loadThemePresets(),
+      editingChatIndex: null
     };
 
     function createId(prefix) {
@@ -1007,6 +1024,8 @@
         els.rightName.disabled = true;
         els.chatSettings.style.display = "none";
         els.chatComposer.style.display = "none";
+        state.editingChatIndex = null;
+        els.addChatBtn.textContent = "대화 추가";
         els.saveBtn.disabled = true;
         els.preview.innerHTML = "<p class='subtle'>오른쪽 기능은 페이지 선택 시 활성화됩니다.</p>";
         return;
@@ -1027,6 +1046,8 @@
       els.leftName.value = node.chatSettings.leftName || "나";
       els.rightName.value = node.chatSettings.rightName || "AI";
       els.content.value = node.content || "";
+      state.editingChatIndex = null;
+      els.addChatBtn.textContent = "대화 추가";
       toggleChatSettings();
       renderChatList();
       updatePreview();
@@ -1062,8 +1083,14 @@
       if (!message) return;
 
       if (!Array.isArray(node.chatMessages)) node.chatMessages = [];
-      node.chatMessages.push({ side: els.chatSide.value, message });
+      if (state.editingChatIndex !== null) {
+        node.chatMessages[state.editingChatIndex] = { side: els.chatSide.value, message };
+      } else {
+        node.chatMessages.push({ side: els.chatSide.value, message });
+      }
       els.chatInput.value = "";
+      state.editingChatIndex = null;
+      els.addChatBtn.textContent = "대화 추가";
       saveData();
       renderChatList();
       updatePreview();
@@ -1073,6 +1100,9 @@
       const node = getSelectedNode();
       if (!node || !Array.isArray(node.chatMessages)) return;
       node.chatMessages.splice(index, 1);
+      if (state.editingChatIndex === index) {
+        cancelEditChatMessage();
+      }
       saveData();
       renderChatList();
       updatePreview();
@@ -1083,9 +1113,29 @@
       if (!node || !Array.isArray(node.chatMessages)) return;
       if (!confirm("대화 로그를 전체 삭제할까요?")) return;
       node.chatMessages = [];
+      state.editingChatIndex = null;
+      els.chatInput.value = "";
+      els.addChatBtn.textContent = "대화 추가";
       saveData();
       renderChatList();
       updatePreview();
+    }
+
+    function startEditChatMessage(index) {
+      const node = getSelectedNode();
+      if (!node || !Array.isArray(node.chatMessages) || !node.chatMessages[index]) return;
+      const target = node.chatMessages[index];
+      state.editingChatIndex = index;
+      els.chatSide.value = target.side;
+      els.chatInput.value = target.message;
+      els.addChatBtn.textContent = "수정 저장";
+      els.chatInput.focus();
+    }
+
+    function cancelEditChatMessage() {
+      state.editingChatIndex = null;
+      els.chatInput.value = "";
+      els.addChatBtn.textContent = "대화 추가";
     }
 
     function renderChatList() {
@@ -1106,7 +1156,10 @@
           <div style="font-size:13px;">
             <strong>${row.side === "right" ? "오른쪽" : "왼쪽"}</strong>: ${escapeHtml(row.message)}
           </div>
-          <button type="button" class="danger" data-remove-chat="${index}" style="padding:4px 8px;">삭제</button>
+          <div class="row">
+            <button type="button" class="ghost" data-edit-chat="${index}" style="padding:4px 8px;">수정</button>
+            <button type="button" class="danger" data-remove-chat="${index}" style="padding:4px 8px;">삭제</button>
+          </div>
         </div>
       `).join("");
     }
@@ -1158,6 +1211,7 @@
       els.deleteBtn.addEventListener("click", deleteSelected);
       els.content.addEventListener("input", updatePreview);
       els.addChatBtn.addEventListener("click", addChatMessage);
+      els.cancelEditChatBtn.addEventListener("click", cancelEditChatMessage);
       els.clearChatBtn.addEventListener("click", clearChatMessages);
       els.chatInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
@@ -1166,6 +1220,11 @@
         }
       });
       els.chatList.addEventListener("click", (e) => {
+        const editTarget = e.target.closest("[data-edit-chat]");
+        if (editTarget) {
+          startEditChatMessage(Number(editTarget.getAttribute("data-edit-chat")));
+          return;
+        }
         const target = e.target.closest("[data-remove-chat]");
         if (!target) return;
         removeChatMessage(Number(target.getAttribute("data-remove-chat")));
