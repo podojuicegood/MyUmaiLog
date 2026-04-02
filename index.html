@@ -78,7 +78,7 @@
       margin: 6px 0 0;
       line-height: 1.4;
     }
-input[type="text"] { height: 30px; }
+
     input[type="text"], textarea, select {
       width: 100%;
       border: 1px solid var(--line);
@@ -96,22 +96,20 @@ input[type="text"] { height: 30px; }
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 16%, transparent);
     }
 
-    .row { display: flex; gap: 8px; margin-top: 7px; }
+    .row { display: flex; gap: 8px; }
 
     button {
       border: 1px solid transparent;
       background: var(--theme-color);
       color: #fff;
-       height: 30px;
       border-radius: 8px;
       padding: 9px 11px;
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: 0.15s ease;
-       justify-content: center;  /* 가로 가운데 */
-  align-items: center;      /* 세로 가운데 */
-      display: flex;
+       white-space: nowrap;
+  flex-shrink: 0;
     }
 
     button:hover { filter: brightness(0.96); }
@@ -163,7 +161,7 @@ input[type="text"] { height: 30px; }
     .tree-item:hover { background: var(--panel-2); }
 
     .tree-item.active {
-      background: color-mix(in srgb, var(--theme-color) 20%, white);
+      background: color-mix(in srgb, var(--theme-color) 12%, white);
       color: var(--theme-color);
       font-weight: 600;
     }
@@ -307,7 +305,7 @@ input[type="text"] { height: 30px; }
     .chat-thread {
       display: flex;
       flex-direction: column;
-      gap: 0px;
+      gap: 8px;
     }
 
     .chat-row {
@@ -339,7 +337,7 @@ input[type="text"] { height: 30px; }
 
     .chat-row.right .chat-bubble {
       background: var(--bubble-right-bg);
-     border: 1px solid var(--line);
+      border-color: color-mix(in srgb, var(--line) 28%, white);
     }
 
     .emoji { width: 18px; text-align: center; }
@@ -351,10 +349,6 @@ input[type="text"] { height: 30px; }
       .editor-body { grid-template-columns: 1fr; }
       .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
     }
-
-    /* ===== 스크롤바 스타일 ===== */
-
-/* Chrome, Edge, Safari */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -366,14 +360,14 @@ input[type="text"] { height: 30px; }
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent; /* 하얀 배경 제거 */
+  background: transparent;
 }
 
-/* Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
 }
+    
   </style>
 </head>
 <body>
