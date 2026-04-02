@@ -7,6 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Umai Log</title>
   <style>
+    /* =========================
+       [수정 포인트] 1) 기본 테마 변수
+       ========================= */
     :root {
       --theme-color: #4f46e5;
       --bg: #ffffff;
@@ -32,6 +35,9 @@
       color: var(--text);
     }
 
+    /* =========================
+       [수정 포인트] 2) 레이아웃
+       ========================= */
     .app {
       min-height: 100vh;
       display: grid;
@@ -41,10 +47,10 @@
     .sidebar {
       border-right: 1px solid var(--line);
       background: var(--panel);
-      padding: 18px 14px;
+      padding: 12px 10px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
     }
 
     .logo {
@@ -60,6 +66,9 @@
       color: var(--theme-color);
     }
 
+    /* =========================
+       [수정 포인트] 3) 카드/입력/버튼
+       ========================= */
     .section {
       background: var(--card-bg);
       border: 1px solid var(--line);
@@ -146,6 +155,9 @@
 
     .tree-node { margin: 3px 0; padding-left: 8px; }
 
+    /* =========================
+       [수정 포인트] 4) 폴더 트리
+       ========================= */
     .tree-item {
       display: flex;
       align-items: center;
@@ -166,12 +178,21 @@
       font-weight: 600;
     }
 
+    .folder-toggle {
+      width: 18px;
+      display: inline-flex;
+      justify-content: center;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
     .main {
-      padding: 24px 28px;
+      padding: 16px 18px;
       background: #fff;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 10px;
     }
 
     .top {
@@ -195,6 +216,9 @@
       font-size: 13px;
     }
 
+    /* =========================
+       [수정 포인트] 5) 에디터/미리보기
+       ========================= */
     .editor {
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -210,7 +234,7 @@
     .editor-head {
       background: var(--panel);
       border-bottom: 1px solid var(--line);
-      padding: 12px;
+      padding: 10px;
       display: flex;
       gap: 10px;
       align-items: end;
@@ -318,7 +342,8 @@
       <div class="logo">🍜 <span>Umai</span> Log</div>
 
       <section class="section">
-        <div class="label">테마 색상 설정</div>
+        <details id="themePanel" open>
+          <summary class="label" style="cursor:pointer;">테마 색상 설정</summary>
         <div class="row">
           <div style="flex:1;">
             <div class="subtle" style="margin:0 0 4px;">포인트 색상</div>
@@ -349,6 +374,16 @@
             <input id="rightBubblePicker" type="color" value="#e6e9ff" />
           </div>
         </div>
+        <div class="row" style="margin-top:8px;">
+          <input id="themePresetName" type="text" placeholder="테마 이름 (예: 밤모드)" />
+          <button id="saveThemePresetBtn" type="button" class="ghost">테마 저장</button>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <select id="themePresetSelect"></select>
+          <button id="loadThemePresetBtn" type="button" class="ghost">불러오기</button>
+          <button id="deleteThemePresetBtn" type="button" class="danger">삭제</button>
+        </div>
+        </details>
       </section>
 
       <section class="section">
@@ -357,7 +392,7 @@
           <input id="folderName" type="text" placeholder="예: 프로젝트 A" />
           <button id="addFolderBtn">추가</button>
         </div>
-        <p class="subtle">현재 선택한 폴더 아래에 하위 폴더가 생성됩니다.</p>
+        <p class="subtle">선택한 폴더 기준으로 생성됩니다. 페이지를 선택한 경우 해당 페이지의 상위 폴더에 생성됩니다.</p>
       </section>
 
       <section class="section">
@@ -441,9 +476,17 @@
   <script>
     const STORAGE_KEY = "umai-log-data-v1";
     const THEME_KEY = "umai-log-theme-color";
+    const THEME_PRESETS_KEY = "umai-log-theme-presets";
+    const UI_KEY = "umai-log-ui-state";
 
     const els = {
       themePicker: document.getElementById("themePicker"),
+      themePanel: document.getElementById("themePanel"),
+      themePresetName: document.getElementById("themePresetName"),
+      themePresetSelect: document.getElementById("themePresetSelect"),
+      saveThemePresetBtn: document.getElementById("saveThemePresetBtn"),
+      loadThemePresetBtn: document.getElementById("loadThemePresetBtn"),
+      deleteThemePresetBtn: document.getElementById("deleteThemePresetBtn"),
       bgPicker: document.getElementById("bgPicker"),
       cardPicker: document.getElementById("cardPicker"),
       textPicker: document.getElementById("textPicker"),
@@ -471,7 +514,12 @@
       deleteBtn: document.getElementById("deleteBtn")
     };
 
-    const state = { selectedId: null, data: loadData() };
+    const state = {
+      selectedId: null,
+      data: loadData(),
+      ui: loadUiState(),
+      themePresets: loadThemePresets()
+    };
 
     function createId(prefix) {
       return `${prefix}-${Math.random().toString(36).slice(2, 9)}-${Date.now().toString(36)}`;
@@ -492,6 +540,34 @@
     }
 
     function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
+
+    function loadUiState() {
+      const raw = localStorage.getItem(UI_KEY);
+      if (!raw) return { collapsedFolders: {}, themePanelOpen: true };
+      try {
+        return { collapsedFolders: {}, themePanelOpen: true, ...JSON.parse(raw) };
+      } catch {
+        return { collapsedFolders: {}, themePanelOpen: true };
+      }
+    }
+
+    function saveUiState() {
+      localStorage.setItem(UI_KEY, JSON.stringify(state.ui));
+    }
+
+    function loadThemePresets() {
+      const raw = localStorage.getItem(THEME_PRESETS_KEY);
+      if (!raw) return {};
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return {};
+      }
+    }
+
+    function saveThemePresets() {
+      localStorage.setItem(THEME_PRESETS_KEY, JSON.stringify(state.themePresets));
+    }
 
     function getDefaultTheme() {
       return {
@@ -537,6 +613,50 @@
       localStorage.setItem(THEME_KEY, JSON.stringify(next));
     }
 
+    function renderThemePresetOptions() {
+      const names = Object.keys(state.themePresets);
+      els.themePresetSelect.innerHTML = "";
+      if (!names.length) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "저장된 테마 없음";
+        els.themePresetSelect.appendChild(opt);
+        return;
+      }
+
+      names.forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        els.themePresetSelect.appendChild(opt);
+      });
+    }
+
+    function saveCurrentAsPreset() {
+      const name = els.themePresetName.value.trim();
+      if (!name) return alert("테마 이름을 입력해주세요.");
+      state.themePresets[name] = readThemeFromInputs();
+      saveThemePresets();
+      renderThemePresetOptions();
+      els.themePresetSelect.value = name;
+      els.themePresetName.value = "";
+    }
+
+    function loadSelectedPreset() {
+      const name = els.themePresetSelect.value;
+      if (!name || !state.themePresets[name]) return;
+      applyTheme(state.themePresets[name]);
+      localStorage.setItem(THEME_KEY, JSON.stringify(state.themePresets[name]));
+    }
+
+    function deleteSelectedPreset() {
+      const name = els.themePresetSelect.value;
+      if (!name || !state.themePresets[name]) return;
+      delete state.themePresets[name];
+      saveThemePresets();
+      renderThemePresetOptions();
+    }
+
     function initTheme() {
       const raw = localStorage.getItem(THEME_KEY);
       const defaults = getDefaultTheme();
@@ -558,6 +678,15 @@
       els.textPicker.addEventListener("input", saveTheme);
       els.leftBubblePicker.addEventListener("input", saveTheme);
       els.rightBubblePicker.addEventListener("input", saveTheme);
+      renderThemePresetOptions();
+      els.saveThemePresetBtn.addEventListener("click", saveCurrentAsPreset);
+      els.loadThemePresetBtn.addEventListener("click", loadSelectedPreset);
+      els.deleteThemePresetBtn.addEventListener("click", deleteSelectedPreset);
+      els.themePanel.open = state.ui.themePanelOpen;
+      els.themePanel.addEventListener("toggle", () => {
+        state.ui.themePanelOpen = els.themePanel.open;
+        saveUiState();
+      });
     }
 
     function getNode(id) { return state.data.nodes[id]; }
@@ -567,7 +696,8 @@
       const selected = getSelectedNode();
       if (!selected) return getNode(state.data.rootId);
       if (selected.type === "folder") return selected;
-      return null;
+      const parentId = findParent(state.data.rootId, selected.id);
+      return parentId ? getNode(parentId) : getNode(state.data.rootId);
     }
 
     function addFolder() {
@@ -661,15 +791,34 @@
 
       const item = document.createElement("div");
       item.className = `tree-item ${state.selectedId === node.id ? "active" : ""}`;
-      item.innerHTML = `<span class="emoji">${node.type === "folder" ? "📁" : "📝"}</span><span>${escapeHtml(node.name)}</span>`;
-      item.onclick = () => {
+      const isFolder = node.type === "folder";
+      const collapsed = Boolean(state.ui.collapsedFolders[node.id]);
+      item.innerHTML = `
+        <span class="folder-toggle">${isFolder ? (collapsed ? "▸" : "▾") : ""}</span>
+        <span class="emoji">${isFolder ? "📁" : "📝"}</span>
+        <span>${escapeHtml(node.name)}</span>
+      `;
+
+      const toggleEl = item.querySelector(".folder-toggle");
+      const nameEl = item.querySelector("span:last-child");
+
+      if (isFolder) {
+        toggleEl.onclick = (e) => {
+          e.stopPropagation();
+          state.ui.collapsedFolders[node.id] = !collapsed;
+          saveUiState();
+          renderTree();
+        };
+      }
+
+      nameEl.onclick = () => {
         state.selectedId = node.id;
         renderTree();
         renderEditor();
       };
       wrapper.appendChild(item);
 
-      if (node.type === "folder" && node.children.length) {
+      if (node.type === "folder" && node.children.length && !collapsed) {
         const ul = document.createElement("ul");
         node.children.forEach((childId) => {
           const child = getNode(childId);
