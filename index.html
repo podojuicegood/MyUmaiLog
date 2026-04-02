@@ -1,8 +1,8 @@
 diff --git a/index.html b/index.html
-index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010cf759e66 100644
+index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..abd111570a1cffa4f079402854e659a7dd9d600f 100644
 --- a/index.html
 +++ b/index.html
-@@ -1,10 +1,583 @@
+@@ -1,10 +1,618 @@
  <!DOCTYPE html>
 -<html>
 +<html lang="ko">
@@ -13,200 +13,275 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +  <title>Umai Log</title>
 +  <style>
 +    :root {
-+      --theme-color: #5b7cfa;
-+      --bg: #f6f7fb;
-+      --text: #1f2330;
-+      --muted: #6f7688;
-+      --card: #ffffff;
-+      --border: #e6e8f0;
-+      --danger: #e5484d;
++      --theme-color: #4f46e5;
++      --bg: #ffffff;
++      --panel: #fbfbfa;
++      --panel-2: #f7f7f5;
++      --text: #37352f;
++      --muted: #787774;
++      --line: #ecebe8;
++      --danger: #e03e3e;
++      --radius: 10px;
++      --shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 +    }
 +
 +    * { box-sizing: border-box; }
 +
 +    body {
 +      margin: 0;
-+      font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
++      font-family: Inter, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 +      background: var(--bg);
 +      color: var(--text);
 +    }
 +
 +    .app {
-+      display: grid;
-+      grid-template-columns: 320px 1fr;
 +      min-height: 100vh;
++      display: grid;
++      grid-template-columns: 290px 1fr;
 +    }
 +
 +    .sidebar {
-+      background: var(--card);
-+      border-right: 1px solid var(--border);
-+      padding: 16px;
++      border-right: 1px solid var(--line);
++      background: var(--panel);
++      padding: 18px 14px;
 +      display: flex;
 +      flex-direction: column;
-+      gap: 14px;
++      gap: 12px;
 +    }
 +
-+    .brand {
-+      margin: 0;
-+      font-size: 20px;
++    .logo {
++      font-size: 18px;
++      font-weight: 700;
++      letter-spacing: -0.02em;
++      padding: 6px 10px;
++      border-radius: 8px;
++      color: var(--text);
++    }
++
++    .logo span {
 +      color: var(--theme-color);
 +    }
 +
-+    .card {
-+      border: 1px solid var(--border);
-+      border-radius: 12px;
-+      padding: 12px;
++    .section {
 +      background: #fff;
++      border: 1px solid var(--line);
++      border-radius: var(--radius);
++      padding: 10px;
 +    }
 +
-+    label {
-+      display: block;
-+      font-size: 13px;
++    .label {
++      font-size: 12px;
 +      color: var(--muted);
-+      margin-bottom: 6px;
++      font-weight: 600;
++      margin-bottom: 7px;
++    }
++
++    .subtle {
++      font-size: 12px;
++      color: var(--muted);
++      margin: 6px 0 0;
++      line-height: 1.4;
 +    }
 +
 +    input[type="text"], textarea, select {
 +      width: 100%;
-+      border: 1px solid var(--border);
-+      border-radius: 10px;
++      border: 1px solid var(--line);
++      border-radius: 8px;
 +      padding: 10px;
 +      font-size: 14px;
++      color: var(--text);
++      background: #fff;
 +      font-family: inherit;
 +      outline: none;
-+      transition: border-color 0.2s;
 +    }
 +
 +    input[type="text"]:focus, textarea:focus, select:focus {
-+      border-color: var(--theme-color);
++      border-color: color-mix(in srgb, var(--theme-color) 70%, #fff);
++      box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 16%, transparent);
 +    }
 +
 +    .row { display: flex; gap: 8px; }
 +
 +    button {
-+      border: 0;
-+      border-radius: 10px;
-+      padding: 10px 12px;
-+      font-size: 13px;
-+      cursor: pointer;
-+      color: #fff;
++      border: 1px solid transparent;
 +      background: var(--theme-color);
++      color: #fff;
++      border-radius: 8px;
++      padding: 9px 11px;
++      font-size: 13px;
++      font-weight: 600;
++      cursor: pointer;
++      transition: 0.15s ease;
 +    }
 +
-+    button.secondary {
-+      background: #f0f2f8;
++    button:hover { filter: brightness(0.96); }
++    button:disabled { opacity: 0.45; cursor: not-allowed; }
++
++    button.ghost {
++      background: #fff;
 +      color: var(--text);
-+      border: 1px solid var(--border);
++      border-color: var(--line);
 +    }
 +
-+    button.danger { background: var(--danger); }
++    button.danger {
++      background: #fff;
++      border-color: color-mix(in srgb, var(--danger) 55%, #fff);
++      color: var(--danger);
++    }
 +
-+    .tree-wrap {
++    .tree-shell {
++      border: 1px solid var(--line);
++      border-radius: var(--radius);
++      background: #fff;
++      padding: 8px;
 +      min-height: 240px;
 +      max-height: 360px;
 +      overflow: auto;
-+      border: 1px solid var(--border);
-+      border-radius: 12px;
-+      padding: 8px;
-+      background: #fff;
 +    }
 +
 +    .tree ul {
 +      list-style: none;
-+      margin: 4px 0 0 14px;
++      margin: 4px 0 0 13px;
 +      padding: 0;
-+      border-left: 1px dashed #d6d8e0;
++      border-left: 1px dashed #dfddd8;
 +    }
 +
-+    .tree-node {
-+      margin: 4px 0;
-+      padding-left: 8px;
-+    }
++    .tree-node { margin: 3px 0; padding-left: 8px; }
 +
 +    .tree-item {
 +      display: flex;
 +      align-items: center;
-+      gap: 6px;
-+      padding: 4px 6px;
-+      border-radius: 8px;
-+      cursor: pointer;
++      gap: 7px;
++      padding: 6px 8px;
++      border-radius: 7px;
 +      font-size: 14px;
++      color: #4d4b47;
++      cursor: pointer;
++      transition: background 0.12s;
 +    }
++
++    .tree-item:hover { background: var(--panel-2); }
 +
 +    .tree-item.active {
 +      background: color-mix(in srgb, var(--theme-color) 12%, white);
 +      color: var(--theme-color);
-+      font-weight: 700;
++      font-weight: 600;
 +    }
-+
-+    .tree-item .emoji { width: 18px; text-align: center; }
 +
 +    .main {
-+      padding: 18px;
++      padding: 24px 28px;
++      background: #fff;
 +      display: flex;
 +      flex-direction: column;
-+      gap: 14px;
++      gap: 16px;
 +    }
 +
-+    .main-head h2 { margin: 0; font-size: 20px; }
-+    .hint { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
++    .top {
++      display: flex;
++      justify-content: space-between;
++      align-items: end;
++      gap: 10px;
++      border-bottom: 1px solid var(--line);
++      padding-bottom: 12px;
++    }
++
++    .title {
++      margin: 0;
++      font-size: 28px;
++      letter-spacing: -0.02em;
++    }
++
++    .desc {
++      margin: 5px 0 0;
++      color: var(--muted);
++      font-size: 13px;
++    }
 +
 +    .editor {
-+      background: var(--card);
-+      border: 1px solid var(--border);
++      border: 1px solid var(--line);
 +      border-radius: 12px;
-+      padding: 14px;
++      box-shadow: var(--shadow);
++      background: #fff;
++      overflow: hidden;
 +      display: flex;
 +      flex-direction: column;
-+      gap: 12px;
 +      min-height: 0;
 +      flex: 1;
 +    }
 +
-+    .split {
++    .editor-head {
++      background: var(--panel);
++      border-bottom: 1px solid var(--line);
++      padding: 12px;
++      display: flex;
++      gap: 10px;
++      align-items: end;
++      flex-wrap: wrap;
++    }
++
++    .editor-body {
 +      display: grid;
 +      grid-template-columns: 1fr 1fr;
-+      gap: 12px;
-+      min-height: 260px;
++      gap: 0;
++      min-height: 420px;
 +      flex: 1;
 +    }
 +
++    .pane {
++      padding: 14px;
++      display: flex;
++      flex-direction: column;
++      gap: 8px;
++    }
++
++    .pane + .pane {
++      border-left: 1px solid var(--line);
++      background: #fcfcfb;
++    }
++
 +    textarea {
++      min-height: 360px;
 +      resize: vertical;
-+      min-height: 260px;
-+      height: 100%;
++      border-radius: 10px;
++      line-height: 1.55;
 +    }
 +
 +    .preview {
-+      border: 1px solid var(--border);
++      border: 1px solid var(--line);
 +      border-radius: 10px;
-+      background: #fff;
 +      padding: 12px;
++      min-height: 360px;
++      background: #fff;
 +      overflow: auto;
-+      min-height: 260px;
 +    }
 +
 +    .chat-line {
-+      border: 1px solid var(--border);
++      border: 1px solid var(--line);
 +      border-radius: 10px;
-+      padding: 8px;
++      padding: 9px;
 +      margin-bottom: 8px;
 +    }
 +
 +    .chat-line .role {
-+      display: inline-block;
-+      background: color-mix(in srgb, var(--theme-color) 12%, white);
-+      color: var(--theme-color);
-+      border-radius: 99px;
++      display: inline-flex;
++      align-items: center;
 +      padding: 2px 8px;
++      border-radius: 999px;
 +      font-size: 12px;
-+      margin-bottom: 5px;
++      font-weight: 600;
++      color: var(--theme-color);
++      background: color-mix(in srgb, var(--theme-color) 12%, white);
++      margin-bottom: 6px;
 +    }
 +
-+    @media (max-width: 960px) {
++    .emoji { width: 18px; text-align: center; }
++
++    @media (max-width: 980px) {
 +      .app { grid-template-columns: 1fr; }
-+      .split { grid-template-columns: 1fr; }
-+      .sidebar { border-right: 0; border-bottom: 1px solid var(--border); }
++      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
++      .main { padding: 14px; }
++      .editor-body { grid-template-columns: 1fr; }
++      .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
 +    }
 +  </style>
  </head>
@@ -215,67 +290,69 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 -  <p>내 첫 깃허브 사이트</p>
 +  <div class="app">
 +    <aside class="sidebar">
-+      <h1 class="brand">Umai Log</h1>
++      <div class="logo">🍜 <span>Umai</span> Log</div>
 +
-+      <section class="card">
-+        <label for="themePicker">UI 테마 색상</label>
-+        <input id="themePicker" type="color" value="#5b7cfa" />
++      <section class="section">
++        <div class="label">테마 색상</div>
++        <input id="themePicker" type="color" value="#4f46e5" />
 +      </section>
 +
-+      <section class="card">
-+        <label for="folderName">새 폴더 이름</label>
++      <section class="section">
++        <div class="label">새 폴더</div>
 +        <div class="row">
-+          <input id="folderName" type="text" placeholder="예: 면접 준비" />
++          <input id="folderName" type="text" placeholder="예: 프로젝트 A" />
 +          <button id="addFolderBtn">추가</button>
 +        </div>
-+        <p class="hint">선택된 폴더 아래에 하위 폴더로 생성됩니다.</p>
++        <p class="subtle">현재 선택한 폴더 아래에 하위 폴더가 생성됩니다.</p>
 +      </section>
 +
-+      <section class="card">
-+        <label for="pageName">새 페이지 이름</label>
++      <section class="section">
++        <div class="label">새 페이지</div>
 +        <div class="row">
-+          <input id="pageName" type="text" placeholder="예: 2026-04-02 대화" />
++          <input id="pageName" type="text" placeholder="예: 2026-04-02 회의" />
 +          <button id="addPageBtn">생성</button>
 +        </div>
 +      </section>
 +
 +      <section>
-+        <label>폴더 / 페이지</label>
-+        <div class="tree-wrap">
++        <div class="label">폴더 / 페이지</div>
++        <div class="tree-shell">
 +          <div id="tree" class="tree"></div>
 +        </div>
 +      </section>
 +    </aside>
 +
 +    <main class="main">
-+      <header class="main-head">
-+        <h2 id="currentTarget">페이지를 선택하거나 생성하세요</h2>
-+        <p class="hint">형식: 대화형식 / 일반 텍스트 / HTML 저장 지원</p>
++      <header class="top">
++        <div>
++          <h1 id="currentTarget" class="title">페이지를 선택하거나 생성하세요</h1>
++          <p class="desc">노션 스타일로 기록하고, 채팅/텍스트/HTML 형식으로 저장해 보세요.</p>
++        </div>
 +      </header>
 +
 +      <section class="editor">
-+        <div class="row">
-+          <div style="flex: 1;">
-+            <label for="pageType">저장 형식</label>
++        <div class="editor-head">
++          <div style="min-width: 220px; flex: 1;">
++            <div class="label">저장 형식</div>
 +            <select id="pageType">
 +              <option value="chat">대화형식 (role: 내용)</option>
 +              <option value="text">일반 텍스트</option>
 +              <option value="html">HTML</option>
 +            </select>
 +          </div>
-+          <div style="display:flex;align-items:end;gap:8px;">
++          <div class="row">
 +            <button id="saveBtn">저장</button>
 +            <button id="deleteBtn" class="danger">삭제</button>
 +          </div>
 +        </div>
 +
-+        <div class="split">
-+          <div>
-+            <label for="content">내용</label>
++        <div class="editor-body">
++          <div class="pane">
++            <div class="label">내용</div>
 +            <textarea id="content" placeholder="내용을 입력하세요."></textarea>
 +          </div>
-+          <div>
-+            <label>미리보기</label>
++          <div class="pane">
++            <div class="label">미리보기</div>
 +            <div id="preview" class="preview"></div>
 +          </div>
 +        </div>
@@ -302,10 +379,7 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +      deleteBtn: document.getElementById("deleteBtn")
 +    };
 +
-+    const state = {
-+      selectedId: null,
-+      data: loadData()
-+    };
++    const state = { selectedId: null, data: loadData() };
 +
 +    function createId(prefix) {
 +      return `${prefix}-${Math.random().toString(36).slice(2, 9)}-${Date.now().toString(36)}`;
@@ -315,30 +389,17 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +      const rootId = createId("folder");
 +      return {
 +        rootId,
-+        nodes: {
-+          [rootId]: {
-+            id: rootId,
-+            type: "folder",
-+            name: "내 로그",
-+            children: []
-+          }
-+        }
++        nodes: { [rootId]: { id: rootId, type: "folder", name: "내 로그", children: [] } }
 +      };
 +    }
 +
 +    function loadData() {
 +      const raw = localStorage.getItem(STORAGE_KEY);
 +      if (!raw) return defaultData();
-+      try {
-+        return JSON.parse(raw);
-+      } catch {
-+        return defaultData();
-+      }
++      try { return JSON.parse(raw); } catch { return defaultData(); }
 +    }
 +
-+    function saveData() {
-+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
-+    }
++    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
 +
 +    function applyTheme(color) {
 +      document.documentElement.style.setProperty("--theme-color", color);
@@ -347,17 +408,12 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +    }
 +
 +    function initTheme() {
-+      applyTheme(localStorage.getItem(THEME_KEY) || "#5b7cfa");
++      applyTheme(localStorage.getItem(THEME_KEY) || "#4f46e5");
 +      els.themePicker.addEventListener("input", (e) => applyTheme(e.target.value));
 +    }
 +
-+    function getNode(id) {
-+      return state.data.nodes[id];
-+    }
-+
-+    function getSelectedNode() {
-+      return state.selectedId ? getNode(state.selectedId) : null;
-+    }
++    function getNode(id) { return state.data.nodes[id]; }
++    function getSelectedNode() { return state.selectedId ? getNode(state.selectedId) : null; }
 +
 +    function ensureSelectedFolder() {
 +      const selected = getSelectedNode();
@@ -369,7 +425,6 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +    function addFolder() {
 +      const name = els.folderName.value.trim();
 +      if (!name) return alert("폴더 이름을 입력해주세요.");
-+
 +      const parent = ensureSelectedFolder();
 +      if (!parent) return alert("폴더를 선택한 상태에서 하위 폴더를 생성할 수 있어요.");
 +
@@ -384,18 +439,11 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +    function addPage() {
 +      const name = els.pageName.value.trim();
 +      if (!name) return alert("페이지 이름을 입력해주세요.");
-+
 +      const parent = ensureSelectedFolder();
 +      if (!parent) return alert("페이지를 만들 폴더를 먼저 선택해주세요.");
 +
 +      const id = createId("page");
-+      state.data.nodes[id] = {
-+        id,
-+        type: "page",
-+        name,
-+        format: "chat",
-+        content: ""
-+      };
++      state.data.nodes[id] = { id, type: "page", name, format: "chat", content: "" };
 +      parent.children.push(id);
 +      state.selectedId = id;
 +      saveData();
@@ -409,8 +457,7 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +      if (!node) return;
 +      if (node.id === state.data.rootId) return alert("루트 폴더는 삭제할 수 없습니다.");
 +
-+      const ok = confirm(`정말 '${node.name}'을(를) 삭제할까요? 하위 내용도 함께 삭제됩니다.`);
-+      if (!ok) return;
++      if (!confirm(`정말 '${node.name}'을(를) 삭제할까요? 하위 내용도 함께 삭제됩니다.`)) return;
 +
 +      const parentId = findParent(state.data.rootId, node.id);
 +      if (parentId) {
@@ -427,9 +474,7 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +    function removeNodeRecursive(id) {
 +      const node = getNode(id);
 +      if (!node) return;
-+      if (node.type === "folder") {
-+        node.children.forEach(removeNodeRecursive);
-+      }
++      if (node.type === "folder") node.children.forEach(removeNodeRecursive);
 +      delete state.data.nodes[id];
 +    }
 +
@@ -466,7 +511,6 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +        renderTree();
 +        renderEditor();
 +      };
-+
 +      wrapper.appendChild(item);
 +
 +      if (node.type === "folder" && node.children.length) {
@@ -480,7 +524,6 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +        });
 +        wrapper.appendChild(ul);
 +      }
-+
 +      return wrapper;
 +    }
 +
@@ -493,11 +536,11 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +        els.content.disabled = true;
 +        els.pageType.disabled = true;
 +        els.saveBtn.disabled = true;
-+        els.preview.innerHTML = "<p class='hint'>오른쪽 기능은 페이지 선택 시 활성화됩니다.</p>";
++        els.preview.innerHTML = "<p class='subtle'>오른쪽 기능은 페이지 선택 시 활성화됩니다.</p>";
 +        return;
 +      }
 +
-+      els.currentTarget.textContent = `편집 중: ${node.name}`;
++      els.currentTarget.textContent = node.name;
 +      els.pageType.disabled = false;
 +      els.content.disabled = false;
 +      els.saveBtn.disabled = false;
@@ -517,16 +560,10 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +    }
 +
 +    function parseChat(content) {
-+      const lines = content.split("\n").filter(Boolean);
-+      return lines.map((line) => {
++      return content.split("\n").filter(Boolean).map((line) => {
 +        const idx = line.indexOf(":");
-+        if (idx === -1) {
-+          return { role: "text", message: line };
-+        }
-+        return {
-+          role: line.slice(0, idx).trim() || "user",
-+          message: line.slice(idx + 1).trim()
-+        };
++        if (idx === -1) return { role: "text", message: line };
++        return { role: line.slice(0, idx).trim() || "user", message: line.slice(idx + 1).trim() };
 +      });
 +    }
 +
@@ -535,29 +572,27 @@ index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010
 +      const content = els.content.value;
 +
 +      if (format === "text") {
-+        els.preview.innerHTML = `<pre style="white-space: pre-wrap; margin:0;">${escapeHtml(content)}</pre>`;
++        els.preview.innerHTML = `<pre style="white-space: pre-wrap; margin:0; line-height:1.55;">${escapeHtml(content)}</pre>`;
 +        return;
 +      }
 +
 +      if (format === "html") {
-+        els.preview.innerHTML = content || "<p class='hint'>HTML을 입력하면 여기서 렌더링됩니다.</p>";
++        els.preview.innerHTML = content || "<p class='subtle'>HTML을 입력하면 여기에서 렌더링됩니다.</p>";
 +        return;
 +      }
 +
 +      const rows = parseChat(content);
 +      if (!rows.length) {
-+        els.preview.innerHTML = "<p class='hint'>예시) user: 질문 / assistant: 답변</p>";
++        els.preview.innerHTML = "<p class='subtle'>예시) user: 질문 / assistant: 답변</p>";
 +        return;
 +      }
 +
-+      els.preview.innerHTML = rows
-+        .map((row) => `
-+          <div class="chat-line">
-+            <div class="role">${escapeHtml(row.role)}</div>
-+            <div>${escapeHtml(row.message)}</div>
-+          </div>
-+        `)
-+        .join("");
++      els.preview.innerHTML = rows.map((row) => `
++        <div class="chat-line">
++          <div class="role">${escapeHtml(row.role)}</div>
++          <div>${escapeHtml(row.message)}</div>
++        </div>
++      `).join("");
 +    }
 +
 +    function escapeHtml(value) {
