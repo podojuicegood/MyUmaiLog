@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <title>My Site</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Umai Log</title>
@@ -400,20 +399,12 @@
       </section>
 
       <section class="section">
-        <div class="label">생성 위치</div>
-        <select id="createTarget">
-          <option value="root">루트 폴더(내 로그)</option>
-          <option value="selected">선택한 폴더 기준</option>
-        </select>
-      </section>
-
-      <section class="section">
         <div class="label">새 폴더</div>
         <div class="row">
           <input id="folderName" type="text" placeholder="예: 프로젝트 A" />
           <button id="addFolderBtn">추가</button>
         </div>
-        <p class="subtle">기본은 루트 생성입니다. 원하면 생성 위치를 \"선택한 폴더 기준\"으로 바꿔주세요.</p>
+        <p class="subtle">폴더를 선택하면 해당 폴더의 하위 폴더로 생성됩니다. 페이지 선택 시에는 상위 폴더 기준으로 생성됩니다.</p>
       </section>
 
       <section class="section">
@@ -514,7 +505,6 @@
       leftBubblePicker: document.getElementById("leftBubblePicker"),
       rightBubblePicker: document.getElementById("rightBubblePicker"),
       folderName: document.getElementById("folderName"),
-      createTarget: document.getElementById("createTarget"),
       pageName: document.getElementById("pageName"),
       addFolderBtn: document.getElementById("addFolderBtn"),
       addPageBtn: document.getElementById("addPageBtn"),
@@ -715,9 +705,6 @@
     function getSelectedNode() { return state.selectedId ? getNode(state.selectedId) : null; }
 
     function getCreateTargetFolder() {
-      if (els.createTarget.value === "root") {
-        return getNode(state.data.rootId);
-      }
       const selected = getSelectedNode();
       if (!selected) return getNode(state.data.rootId);
       if (selected.type === "folder") return selected;
