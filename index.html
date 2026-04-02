@@ -1,10 +1,592 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Site</title>
-</head>
-<body>
-  <h1>Hello World 👋</h1>
-  <p>내 첫 깃허브 사이트</p>
-</body>
-</html>
+diff --git a/index.html b/index.html
+index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..4e245c1cbd39a4efb47e97df52a9c010cf759e66 100644
+--- a/index.html
++++ b/index.html
+@@ -1,10 +1,583 @@
+ <!DOCTYPE html>
+-<html>
++<html lang="ko">
+ <head>
+-  <title>My Site</title>
++  <meta charset="UTF-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++  <title>Umai Log</title>
++  <style>
++    :root {
++      --theme-color: #5b7cfa;
++      --bg: #f6f7fb;
++      --text: #1f2330;
++      --muted: #6f7688;
++      --card: #ffffff;
++      --border: #e6e8f0;
++      --danger: #e5484d;
++    }
++
++    * { box-sizing: border-box; }
++
++    body {
++      margin: 0;
++      font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
++      background: var(--bg);
++      color: var(--text);
++    }
++
++    .app {
++      display: grid;
++      grid-template-columns: 320px 1fr;
++      min-height: 100vh;
++    }
++
++    .sidebar {
++      background: var(--card);
++      border-right: 1px solid var(--border);
++      padding: 16px;
++      display: flex;
++      flex-direction: column;
++      gap: 14px;
++    }
++
++    .brand {
++      margin: 0;
++      font-size: 20px;
++      color: var(--theme-color);
++    }
++
++    .card {
++      border: 1px solid var(--border);
++      border-radius: 12px;
++      padding: 12px;
++      background: #fff;
++    }
++
++    label {
++      display: block;
++      font-size: 13px;
++      color: var(--muted);
++      margin-bottom: 6px;
++    }
++
++    input[type="text"], textarea, select {
++      width: 100%;
++      border: 1px solid var(--border);
++      border-radius: 10px;
++      padding: 10px;
++      font-size: 14px;
++      font-family: inherit;
++      outline: none;
++      transition: border-color 0.2s;
++    }
++
++    input[type="text"]:focus, textarea:focus, select:focus {
++      border-color: var(--theme-color);
++    }
++
++    .row { display: flex; gap: 8px; }
++
++    button {
++      border: 0;
++      border-radius: 10px;
++      padding: 10px 12px;
++      font-size: 13px;
++      cursor: pointer;
++      color: #fff;
++      background: var(--theme-color);
++    }
++
++    button.secondary {
++      background: #f0f2f8;
++      color: var(--text);
++      border: 1px solid var(--border);
++    }
++
++    button.danger { background: var(--danger); }
++
++    .tree-wrap {
++      min-height: 240px;
++      max-height: 360px;
++      overflow: auto;
++      border: 1px solid var(--border);
++      border-radius: 12px;
++      padding: 8px;
++      background: #fff;
++    }
++
++    .tree ul {
++      list-style: none;
++      margin: 4px 0 0 14px;
++      padding: 0;
++      border-left: 1px dashed #d6d8e0;
++    }
++
++    .tree-node {
++      margin: 4px 0;
++      padding-left: 8px;
++    }
++
++    .tree-item {
++      display: flex;
++      align-items: center;
++      gap: 6px;
++      padding: 4px 6px;
++      border-radius: 8px;
++      cursor: pointer;
++      font-size: 14px;
++    }
++
++    .tree-item.active {
++      background: color-mix(in srgb, var(--theme-color) 12%, white);
++      color: var(--theme-color);
++      font-weight: 700;
++    }
++
++    .tree-item .emoji { width: 18px; text-align: center; }
++
++    .main {
++      padding: 18px;
++      display: flex;
++      flex-direction: column;
++      gap: 14px;
++    }
++
++    .main-head h2 { margin: 0; font-size: 20px; }
++    .hint { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
++
++    .editor {
++      background: var(--card);
++      border: 1px solid var(--border);
++      border-radius: 12px;
++      padding: 14px;
++      display: flex;
++      flex-direction: column;
++      gap: 12px;
++      min-height: 0;
++      flex: 1;
++    }
++
++    .split {
++      display: grid;
++      grid-template-columns: 1fr 1fr;
++      gap: 12px;
++      min-height: 260px;
++      flex: 1;
++    }
++
++    textarea {
++      resize: vertical;
++      min-height: 260px;
++      height: 100%;
++    }
++
++    .preview {
++      border: 1px solid var(--border);
++      border-radius: 10px;
++      background: #fff;
++      padding: 12px;
++      overflow: auto;
++      min-height: 260px;
++    }
++
++    .chat-line {
++      border: 1px solid var(--border);
++      border-radius: 10px;
++      padding: 8px;
++      margin-bottom: 8px;
++    }
++
++    .chat-line .role {
++      display: inline-block;
++      background: color-mix(in srgb, var(--theme-color) 12%, white);
++      color: var(--theme-color);
++      border-radius: 99px;
++      padding: 2px 8px;
++      font-size: 12px;
++      margin-bottom: 5px;
++    }
++
++    @media (max-width: 960px) {
++      .app { grid-template-columns: 1fr; }
++      .split { grid-template-columns: 1fr; }
++      .sidebar { border-right: 0; border-bottom: 1px solid var(--border); }
++    }
++  </style>
+ </head>
+ <body>
+-  <h1>Hello World 👋</h1>
+-  <p>내 첫 깃허브 사이트</p>
++  <div class="app">
++    <aside class="sidebar">
++      <h1 class="brand">Umai Log</h1>
++
++      <section class="card">
++        <label for="themePicker">UI 테마 색상</label>
++        <input id="themePicker" type="color" value="#5b7cfa" />
++      </section>
++
++      <section class="card">
++        <label for="folderName">새 폴더 이름</label>
++        <div class="row">
++          <input id="folderName" type="text" placeholder="예: 면접 준비" />
++          <button id="addFolderBtn">추가</button>
++        </div>
++        <p class="hint">선택된 폴더 아래에 하위 폴더로 생성됩니다.</p>
++      </section>
++
++      <section class="card">
++        <label for="pageName">새 페이지 이름</label>
++        <div class="row">
++          <input id="pageName" type="text" placeholder="예: 2026-04-02 대화" />
++          <button id="addPageBtn">생성</button>
++        </div>
++      </section>
++
++      <section>
++        <label>폴더 / 페이지</label>
++        <div class="tree-wrap">
++          <div id="tree" class="tree"></div>
++        </div>
++      </section>
++    </aside>
++
++    <main class="main">
++      <header class="main-head">
++        <h2 id="currentTarget">페이지를 선택하거나 생성하세요</h2>
++        <p class="hint">형식: 대화형식 / 일반 텍스트 / HTML 저장 지원</p>
++      </header>
++
++      <section class="editor">
++        <div class="row">
++          <div style="flex: 1;">
++            <label for="pageType">저장 형식</label>
++            <select id="pageType">
++              <option value="chat">대화형식 (role: 내용)</option>
++              <option value="text">일반 텍스트</option>
++              <option value="html">HTML</option>
++            </select>
++          </div>
++          <div style="display:flex;align-items:end;gap:8px;">
++            <button id="saveBtn">저장</button>
++            <button id="deleteBtn" class="danger">삭제</button>
++          </div>
++        </div>
++
++        <div class="split">
++          <div>
++            <label for="content">내용</label>
++            <textarea id="content" placeholder="내용을 입력하세요."></textarea>
++          </div>
++          <div>
++            <label>미리보기</label>
++            <div id="preview" class="preview"></div>
++          </div>
++        </div>
++      </section>
++    </main>
++  </div>
++
++  <script>
++    const STORAGE_KEY = "umai-log-data-v1";
++    const THEME_KEY = "umai-log-theme-color";
++
++    const els = {
++      themePicker: document.getElementById("themePicker"),
++      folderName: document.getElementById("folderName"),
++      pageName: document.getElementById("pageName"),
++      addFolderBtn: document.getElementById("addFolderBtn"),
++      addPageBtn: document.getElementById("addPageBtn"),
++      tree: document.getElementById("tree"),
++      currentTarget: document.getElementById("currentTarget"),
++      pageType: document.getElementById("pageType"),
++      content: document.getElementById("content"),
++      preview: document.getElementById("preview"),
++      saveBtn: document.getElementById("saveBtn"),
++      deleteBtn: document.getElementById("deleteBtn")
++    };
++
++    const state = {
++      selectedId: null,
++      data: loadData()
++    };
++
++    function createId(prefix) {
++      return `${prefix}-${Math.random().toString(36).slice(2, 9)}-${Date.now().toString(36)}`;
++    }
++
++    function defaultData() {
++      const rootId = createId("folder");
++      return {
++        rootId,
++        nodes: {
++          [rootId]: {
++            id: rootId,
++            type: "folder",
++            name: "내 로그",
++            children: []
++          }
++        }
++      };
++    }
++
++    function loadData() {
++      const raw = localStorage.getItem(STORAGE_KEY);
++      if (!raw) return defaultData();
++      try {
++        return JSON.parse(raw);
++      } catch {
++        return defaultData();
++      }
++    }
++
++    function saveData() {
++      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
++    }
++
++    function applyTheme(color) {
++      document.documentElement.style.setProperty("--theme-color", color);
++      localStorage.setItem(THEME_KEY, color);
++      els.themePicker.value = color;
++    }
++
++    function initTheme() {
++      applyTheme(localStorage.getItem(THEME_KEY) || "#5b7cfa");
++      els.themePicker.addEventListener("input", (e) => applyTheme(e.target.value));
++    }
++
++    function getNode(id) {
++      return state.data.nodes[id];
++    }
++
++    function getSelectedNode() {
++      return state.selectedId ? getNode(state.selectedId) : null;
++    }
++
++    function ensureSelectedFolder() {
++      const selected = getSelectedNode();
++      if (!selected) return getNode(state.data.rootId);
++      if (selected.type === "folder") return selected;
++      return null;
++    }
++
++    function addFolder() {
++      const name = els.folderName.value.trim();
++      if (!name) return alert("폴더 이름을 입력해주세요.");
++
++      const parent = ensureSelectedFolder();
++      if (!parent) return alert("폴더를 선택한 상태에서 하위 폴더를 생성할 수 있어요.");
++
++      const id = createId("folder");
++      state.data.nodes[id] = { id, type: "folder", name, children: [] };
++      parent.children.push(id);
++      saveData();
++      els.folderName.value = "";
++      renderTree();
++    }
++
++    function addPage() {
++      const name = els.pageName.value.trim();
++      if (!name) return alert("페이지 이름을 입력해주세요.");
++
++      const parent = ensureSelectedFolder();
++      if (!parent) return alert("페이지를 만들 폴더를 먼저 선택해주세요.");
++
++      const id = createId("page");
++      state.data.nodes[id] = {
++        id,
++        type: "page",
++        name,
++        format: "chat",
++        content: ""
++      };
++      parent.children.push(id);
++      state.selectedId = id;
++      saveData();
++      els.pageName.value = "";
++      renderTree();
++      renderEditor();
++    }
++
++    function deleteSelected() {
++      const node = getSelectedNode();
++      if (!node) return;
++      if (node.id === state.data.rootId) return alert("루트 폴더는 삭제할 수 없습니다.");
++
++      const ok = confirm(`정말 '${node.name}'을(를) 삭제할까요? 하위 내용도 함께 삭제됩니다.`);
++      if (!ok) return;
++
++      const parentId = findParent(state.data.rootId, node.id);
++      if (parentId) {
++        const parent = getNode(parentId);
++        parent.children = parent.children.filter((id) => id !== node.id);
++      }
++      removeNodeRecursive(node.id);
++      state.selectedId = null;
++      saveData();
++      renderTree();
++      renderEditor();
++    }
++
++    function removeNodeRecursive(id) {
++      const node = getNode(id);
++      if (!node) return;
++      if (node.type === "folder") {
++        node.children.forEach(removeNodeRecursive);
++      }
++      delete state.data.nodes[id];
++    }
++
++    function findParent(currentId, targetId) {
++      const current = getNode(currentId);
++      if (!current || current.type !== "folder") return null;
++      if (current.children.includes(targetId)) return current.id;
++
++      for (const childId of current.children) {
++        const child = getNode(childId);
++        if (child?.type === "folder") {
++          const found = findParent(childId, targetId);
++          if (found) return found;
++        }
++      }
++      return null;
++    }
++
++    function renderTree() {
++      const root = getNode(state.data.rootId);
++      els.tree.innerHTML = "";
++      els.tree.appendChild(renderNode(root));
++    }
++
++    function renderNode(node) {
++      const wrapper = document.createElement("div");
++      wrapper.className = "tree-node";
++
++      const item = document.createElement("div");
++      item.className = `tree-item ${state.selectedId === node.id ? "active" : ""}`;
++      item.innerHTML = `<span class="emoji">${node.type === "folder" ? "📁" : "📝"}</span><span>${escapeHtml(node.name)}</span>`;
++      item.onclick = () => {
++        state.selectedId = node.id;
++        renderTree();
++        renderEditor();
++      };
++
++      wrapper.appendChild(item);
++
++      if (node.type === "folder" && node.children.length) {
++        const ul = document.createElement("ul");
++        node.children.forEach((childId) => {
++          const child = getNode(childId);
++          if (!child) return;
++          const li = document.createElement("li");
++          li.appendChild(renderNode(child));
++          ul.appendChild(li);
++        });
++        wrapper.appendChild(ul);
++      }
++
++      return wrapper;
++    }
++
++    function renderEditor() {
++      const node = getSelectedNode();
++      if (!node || node.type !== "page") {
++        els.currentTarget.textContent = "페이지를 선택하거나 생성하세요";
++        els.pageType.value = "chat";
++        els.content.value = "";
++        els.content.disabled = true;
++        els.pageType.disabled = true;
++        els.saveBtn.disabled = true;
++        els.preview.innerHTML = "<p class='hint'>오른쪽 기능은 페이지 선택 시 활성화됩니다.</p>";
++        return;
++      }
++
++      els.currentTarget.textContent = `편집 중: ${node.name}`;
++      els.pageType.disabled = false;
++      els.content.disabled = false;
++      els.saveBtn.disabled = false;
++      els.pageType.value = node.format || "chat";
++      els.content.value = node.content || "";
++      updatePreview();
++    }
++
++    function saveCurrentPage() {
++      const node = getSelectedNode();
++      if (!node || node.type !== "page") return;
++      node.format = els.pageType.value;
++      node.content = els.content.value;
++      saveData();
++      updatePreview();
++      alert("저장되었습니다.");
++    }
++
++    function parseChat(content) {
++      const lines = content.split("\n").filter(Boolean);
++      return lines.map((line) => {
++        const idx = line.indexOf(":");
++        if (idx === -1) {
++          return { role: "text", message: line };
++        }
++        return {
++          role: line.slice(0, idx).trim() || "user",
++          message: line.slice(idx + 1).trim()
++        };
++      });
++    }
++
++    function updatePreview() {
++      const format = els.pageType.value;
++      const content = els.content.value;
++
++      if (format === "text") {
++        els.preview.innerHTML = `<pre style="white-space: pre-wrap; margin:0;">${escapeHtml(content)}</pre>`;
++        return;
++      }
++
++      if (format === "html") {
++        els.preview.innerHTML = content || "<p class='hint'>HTML을 입력하면 여기서 렌더링됩니다.</p>";
++        return;
++      }
++
++      const rows = parseChat(content);
++      if (!rows.length) {
++        els.preview.innerHTML = "<p class='hint'>예시) user: 질문 / assistant: 답변</p>";
++        return;
++      }
++
++      els.preview.innerHTML = rows
++        .map((row) => `
++          <div class="chat-line">
++            <div class="role">${escapeHtml(row.role)}</div>
++            <div>${escapeHtml(row.message)}</div>
++          </div>
++        `)
++        .join("");
++    }
++
++    function escapeHtml(value) {
++      return value
++        .replaceAll("&", "&amp;")
++        .replaceAll("<", "&lt;")
++        .replaceAll(">", "&gt;")
++        .replaceAll('"', "&quot;")
++        .replaceAll("'", "&#39;");
++    }
++
++    function bindEvents() {
++      els.addFolderBtn.addEventListener("click", addFolder);
++      els.addPageBtn.addEventListener("click", addPage);
++      els.saveBtn.addEventListener("click", saveCurrentPage);
++      els.deleteBtn.addEventListener("click", deleteSelected);
++      els.content.addEventListener("input", updatePreview);
++      els.pageType.addEventListener("change", updatePreview);
++    }
++
++    function init() {
++      initTheme();
++      bindEvents();
++      state.selectedId = state.data.rootId;
++      renderTree();
++      renderEditor();
++    }
++
++    init();
++  </script>
+ </body>
+ </html>
