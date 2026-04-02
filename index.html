@@ -44,7 +44,7 @@
 
     .sidebar {
       border-right: 1px solid var(--line);
-      background: var(--panel);
+      background: var(--bg);
       padding: 12px 10px;
       display: flex;
       flex-direction: column;
@@ -76,14 +76,16 @@
 
     .label {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--text);
+      opacity: 0.8;
       font-weight: 600;
       margin-bottom: 7px;
     }
 
     .subtle {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--text);
+      opacity: 0.7;
       margin: 6px 0 0;
       line-height: 1.4;
     }
@@ -164,6 +166,7 @@
       border-radius: 7px;
       font-size: 14px;
       color: #4d4b47;
+      color: var(--text);
       cursor: pointer;
       transition: background 0.12s;
     }
@@ -174,6 +177,12 @@
       background: color-mix(in srgb, var(--theme-color) 12%, white);
       color: var(--theme-color);
       font-weight: 600;
+    }
+
+    .tree-item.drag-over {
+      outline: 2px dashed var(--theme-color);
+      outline-offset: -2px;
+      background: color-mix(in srgb, var(--theme-color) 10%, white);
     }
 
     .folder-toggle {
@@ -203,7 +212,7 @@
 
     .main {
       padding: 16px 18px;
-      background: #fff;
+      background: var(--bg);
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -375,6 +384,10 @@
             <div class="subtle" style="margin:0 0 4px;">글자 색상</div>
             <input id="textPicker" type="color" value="#37352f" />
           </div>
+          <div style="flex:1;">
+            <div class="subtle" style="margin:0 0 4px;">테두리 색상</div>
+            <input id="borderPicker" type="color" value="#ecebe8" />
+          </div>
         </div>
         <div class="row" style="margin-top:8px;">
           <div style="flex:1;">
@@ -404,7 +417,11 @@
           <input id="folderName" type="text" placeholder="예: 프로젝트 A" />
           <button id="addFolderBtn">추가</button>
         </div>
-        <p class="subtle">폴더를 선택하면 해당 폴더의 하위 폴더로 생성됩니다. 페이지 선택 시에는 상위 폴더 기준으로 생성됩니다.</p>
+        <label style="display:flex; gap:6px; align-items:center; margin-top:6px;">
+          <input id="createAsChild" type="checkbox" />
+          <span class="subtle" style="margin:0;">선택 폴더 하위로 생성</span>
+        </label>
+        <p class="subtle">기본은 루트(내 로그) 바로 아래에 생성됩니다.</p>
       </section>
 
       <section class="section">
@@ -419,6 +436,14 @@
         <div class="label">폴더 / 페이지</div>
         <div class="tree-shell">
           <div id="tree" class="tree"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="label">선택 항목 이동</div>
+        <div class="row">
+          <select id="moveTargetFolder"></select>
+          <button id="moveBtn" class="ghost" type="button">이동</button>
         </div>
       </section>
     </aside>
@@ -502,9 +527,11 @@
       bgPicker: document.getElementById("bgPicker"),
       cardPicker: document.getElementById("cardPicker"),
       textPicker: document.getElementById("textPicker"),
+      borderPicker: document.getElementById("borderPicker"),
       leftBubblePicker: document.getElementById("leftBubblePicker"),
       rightBubblePicker: document.getElementById("rightBubblePicker"),
       folderName: document.getElementById("folderName"),
+      createAsChild: document.getElementById("createAsChild"),
       pageName: document.getElementById("pageName"),
       addFolderBtn: document.getElementById("addFolderBtn"),
       addPageBtn: document.getElementById("addPageBtn"),
@@ -520,6 +547,8 @@
       addChatBtn: document.getElementById("addChatBtn"),
       clearChatBtn: document.getElementById("clearChatBtn"),
       chatList: document.getElementById("chatList"),
+      moveTargetFolder: document.getElementById("moveTargetFolder"),
+      moveBtn: document.getElementById("moveBtn"),
       content: document.getElementById("content"),
       preview: document.getElementById("preview"),
       saveBtn: document.getElementById("saveBtn"),
@@ -587,6 +616,7 @@
         bg: "#ffffff",
         card: "#ffffff",
         text: "#37352f",
+        border: "#ecebe8",
         bubbleLeft: "#ffffff",
         bubbleRight: "#e6e9ff"
       };
@@ -597,6 +627,7 @@
       document.documentElement.style.setProperty("--bg", settings.bg);
       document.documentElement.style.setProperty("--card-bg", settings.card);
       document.documentElement.style.setProperty("--text", settings.text);
+      document.documentElement.style.setProperty("--line", settings.border);
       document.documentElement.style.setProperty("--bubble-left-bg", settings.bubbleLeft);
       document.documentElement.style.setProperty("--bubble-right-bg", settings.bubbleRight);
 
@@ -604,6 +635,7 @@
       els.bgPicker.value = settings.bg;
       els.cardPicker.value = settings.card;
       els.textPicker.value = settings.text;
+      els.borderPicker.value = settings.border;
       els.leftBubblePicker.value = settings.bubbleLeft;
       els.rightBubblePicker.value = settings.bubbleRight;
     }
@@ -614,6 +646,7 @@
         bg: els.bgPicker.value,
         card: els.cardPicker.value,
         text: els.textPicker.value,
+        border: els.borderPicker.value,
         bubbleLeft: els.leftBubblePicker.value,
         bubbleRight: els.rightBubblePicker.value
       };
@@ -688,6 +721,7 @@
       els.bgPicker.addEventListener("input", saveTheme);
       els.cardPicker.addEventListener("input", saveTheme);
       els.textPicker.addEventListener("input", saveTheme);
+      els.borderPicker.addEventListener("input", saveTheme);
       els.leftBubblePicker.addEventListener("input", saveTheme);
       els.rightBubblePicker.addEventListener("input", saveTheme);
       renderThemePresetOptions();
@@ -705,6 +739,9 @@
     function getSelectedNode() { return state.selectedId ? getNode(state.selectedId) : null; }
 
     function getCreateTargetFolder() {
+      if (!els.createAsChild.checked) {
+        return getNode(state.data.rootId);
+      }
       const selected = getSelectedNode();
       if (!selected) return getNode(state.data.rootId);
       if (selected.type === "folder") return selected;
@@ -797,10 +834,76 @@
       return null;
     }
 
+    function isDescendant(folderId, possibleDescendantId) {
+      const folder = getNode(folderId);
+      if (!folder || folder.type !== "folder") return false;
+      if (folder.children.includes(possibleDescendantId)) return true;
+      return folder.children.some((childId) => {
+        const child = getNode(childId);
+        return child?.type === "folder" && isDescendant(childId, possibleDescendantId);
+      });
+    }
+
+    function buildFolderPathMap(folderId, prefix = "") {
+      const folder = getNode(folderId);
+      if (!folder || folder.type !== "folder") return [];
+      const currentPath = prefix ? `${prefix} / ${folder.name}` : folder.name;
+      const result = [{ id: folder.id, path: currentPath }];
+      folder.children.forEach((childId) => {
+        const child = getNode(childId);
+        if (child?.type === "folder") {
+          result.push(...buildFolderPathMap(childId, currentPath));
+        }
+      });
+      return result;
+    }
+
+    function renderMoveTargets() {
+      const folders = buildFolderPathMap(state.data.rootId);
+      els.moveTargetFolder.innerHTML = folders
+        .map((f) => `<option value="${f.id}">${escapeHtml(f.path)}</option>`)
+        .join("");
+    }
+
+    function moveSelectedToFolder() {
+      const node = getSelectedNode();
+      if (!node || node.id === state.data.rootId) return alert("이동할 항목을 선택해주세요.");
+
+      const targetFolderId = els.moveTargetFolder.value;
+      if (!canMoveNodeToFolder(node.id, targetFolderId)) {
+        return alert("폴더를 자기 자신 또는 하위 폴더로 이동할 수 없습니다.");
+      }
+      moveNodeToFolder(node.id, targetFolderId);
+    }
+
+    function canMoveNodeToFolder(nodeId, targetFolderId) {
+      const node = getNode(nodeId);
+      const targetFolder = getNode(targetFolderId);
+      if (!node || !targetFolder || targetFolder.type !== "folder") return false;
+      if (node.id === state.data.rootId) return false;
+      if (node.id === targetFolderId) return false;
+      if (node.type === "folder" && isDescendant(node.id, targetFolderId)) return false;
+      return true;
+    }
+
+    function moveNodeToFolder(nodeId, targetFolderId) {
+      if (!canMoveNodeToFolder(nodeId, targetFolderId)) return;
+      const oldParentId = findParent(state.data.rootId, nodeId);
+      if (!oldParentId) return;
+      const oldParent = getNode(oldParentId);
+      const targetFolder = getNode(targetFolderId);
+      oldParent.children = oldParent.children.filter((id) => id !== nodeId);
+      targetFolder.children.push(nodeId);
+      saveData();
+      renderTree();
+      renderEditor();
+    }
+
     function renderTree() {
       const root = getNode(state.data.rootId);
       els.tree.innerHTML = "";
       els.tree.appendChild(renderNode(root));
+      renderMoveTargets();
     }
 
     function renderNode(node) {
@@ -811,6 +914,7 @@
       item.className = `tree-item ${state.selectedId === node.id ? "active" : ""}`;
       const isFolder = node.type === "folder";
       const collapsed = Boolean(state.ui.collapsedFolders[node.id]);
+      item.draggable = node.id !== state.data.rootId;
       item.innerHTML = `
         <span class="folder-toggle">${isFolder ? (collapsed ? "▸" : "▾") : ""}</span>
         <span class="emoji">${isFolder ? "📁" : "📝"}</span>
@@ -843,6 +947,30 @@
           e.stopPropagation();
           deleteNodeById(node.id);
         };
+      }
+
+      item.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", node.id);
+        e.dataTransfer.effectAllowed = "move";
+      });
+
+      if (isFolder) {
+        item.addEventListener("dragover", (e) => {
+          const draggingId = e.dataTransfer.getData("text/plain");
+          if (!canMoveNodeToFolder(draggingId, node.id)) return;
+          e.preventDefault();
+          item.classList.add("drag-over");
+          e.dataTransfer.dropEffect = "move";
+        });
+        item.addEventListener("dragleave", () => {
+          item.classList.remove("drag-over");
+        });
+        item.addEventListener("drop", (e) => {
+          e.preventDefault();
+          item.classList.remove("drag-over");
+          const draggingId = e.dataTransfer.getData("text/plain");
+          moveNodeToFolder(draggingId, node.id);
+        });
       }
       wrapper.appendChild(item);
 
@@ -1044,6 +1172,7 @@
       });
       els.leftName.addEventListener("input", updatePreview);
       els.rightName.addEventListener("input", updatePreview);
+      els.moveBtn.addEventListener("click", moveSelectedToFolder);
     }
 
     function init() {
