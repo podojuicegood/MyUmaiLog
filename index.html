@@ -421,7 +421,7 @@
           <input id="createAsChild" type="checkbox" />
           <span class="subtle" style="margin:0;">선택 폴더 하위로 생성</span>
         </label>
-        <p class="subtle">기본은 루트(내 로그) 바로 아래에 생성됩니다.</p>
+        <p class="subtle">기본은 최상위(개별 폴더) 생성입니다.</p>
       </section>
 
       <section class="section">
@@ -902,7 +902,15 @@
     function renderTree() {
       const root = getNode(state.data.rootId);
       els.tree.innerHTML = "";
-      els.tree.appendChild(renderNode(root));
+      if (!root.children.length) {
+        els.tree.innerHTML = "<p class='subtle'>아직 폴더/페이지가 없습니다. 새로 만들어보세요.</p>";
+      } else {
+        root.children.forEach((childId) => {
+          const child = getNode(childId);
+          if (!child) return;
+          els.tree.appendChild(renderNode(child));
+        });
+      }
       renderMoveTargets();
     }
 
@@ -1178,7 +1186,7 @@
     function init() {
       initTheme();
       bindEvents();
-      state.selectedId = state.data.rootId;
+      state.selectedId = null;
       renderTree();
       renderEditor();
     }
