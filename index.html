@@ -12,10 +12,13 @@
       --bg: #ffffff;
       --panel: #fbfbfa;
       --panel-2: #f7f7f5;
+      --card-bg: #ffffff;
       --text: #37352f;
       --muted: #787774;
       --line: #ecebe8;
       --danger: #e03e3e;
+      --bubble-left-bg: #ffffff;
+      --bubble-right-bg: #e6e9ff;
       --radius: 10px;
       --shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
     }
@@ -58,7 +61,7 @@
     }
 
     .section {
-      background: #fff;
+      background: var(--card-bg);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 10px;
@@ -85,7 +88,7 @@
       padding: 10px;
       font-size: 14px;
       color: var(--text);
-      background: #fff;
+      background: var(--card-bg);
       font-family: inherit;
       outline: none;
     }
@@ -127,7 +130,7 @@
     .tree-shell {
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      background: #fff;
+      background: var(--card-bg);
       padding: 8px;
       min-height: 240px;
       max-height: 360px;
@@ -196,7 +199,7 @@
       border: 1px solid var(--line);
       border-radius: 12px;
       box-shadow: var(--shadow);
-      background: #fff;
+      background: var(--card-bg);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -246,7 +249,7 @@
       border-radius: 10px;
       padding: 12px;
       min-height: 360px;
-      background: #fff;
+      background: var(--card-bg);
       overflow: auto;
     }
 
@@ -287,12 +290,12 @@
       border-radius: 14px;
       padding: 10px 12px;
       line-height: 1.5;
-      background: #fff;
+      background: var(--bubble-left-bg);
       word-break: break-word;
     }
 
     .chat-row.right .chat-bubble {
-      background: color-mix(in srgb, var(--theme-color) 14%, white);
+      background: var(--bubble-right-bg);
       border-color: color-mix(in srgb, var(--theme-color) 28%, white);
     }
 
@@ -315,8 +318,37 @@
       <div class="logo">🍜 <span>Umai</span> Log</div>
 
       <section class="section">
-        <div class="label">테마 색상</div>
-        <input id="themePicker" type="color" value="#4f46e5" />
+        <div class="label">테마 색상 설정</div>
+        <div class="row">
+          <div style="flex:1;">
+            <div class="subtle" style="margin:0 0 4px;">포인트 색상</div>
+            <input id="themePicker" type="color" value="#4f46e5" />
+          </div>
+          <div style="flex:1;">
+            <div class="subtle" style="margin:0 0 4px;">배경 색상</div>
+            <input id="bgPicker" type="color" value="#ffffff" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <div style="flex:1;">
+            <div class="subtle" style="margin:0 0 4px;">카드 색상</div>
+            <input id="cardPicker" type="color" value="#ffffff" />
+          </div>
+          <div style="flex:1;">
+            <div class="subtle" style="margin:0 0 4px;">글자 색상</div>
+            <input id="textPicker" type="color" value="#37352f" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <div style="flex:1;">
+            <div class="subtle" style="margin:0 0 4px;">왼쪽 말풍선</div>
+            <input id="leftBubblePicker" type="color" value="#ffffff" />
+          </div>
+          <div style="flex:1;">
+            <div class="subtle" style="margin:0 0 4px;">오른쪽 말풍선</div>
+            <input id="rightBubblePicker" type="color" value="#e6e9ff" />
+          </div>
+        </div>
       </section>
 
       <section class="section">
@@ -381,6 +413,20 @@
         <div class="editor-body">
           <div class="pane">
             <div class="label">내용</div>
+            <div id="chatComposer" style="display:none; gap:8px; margin-bottom:8px;">
+              <div class="row">
+                <select id="chatSide" style="max-width:140px;">
+                  <option value="left">왼쪽</option>
+                  <option value="right">오른쪽</option>
+                </select>
+                <input id="chatInput" type="text" placeholder="대화 내용을 입력하세요" />
+                <button id="addChatBtn" type="button">대화 추가</button>
+              </div>
+              <div class="row">
+                <button id="clearChatBtn" type="button" class="ghost">대화 전체 삭제</button>
+              </div>
+              <div id="chatList" class="preview" style="min-height:120px;"></div>
+            </div>
             <textarea id="content" placeholder="내용을 입력하세요."></textarea>
           </div>
           <div class="pane">
@@ -398,6 +444,11 @@
 
     const els = {
       themePicker: document.getElementById("themePicker"),
+      bgPicker: document.getElementById("bgPicker"),
+      cardPicker: document.getElementById("cardPicker"),
+      textPicker: document.getElementById("textPicker"),
+      leftBubblePicker: document.getElementById("leftBubblePicker"),
+      rightBubblePicker: document.getElementById("rightBubblePicker"),
       folderName: document.getElementById("folderName"),
       pageName: document.getElementById("pageName"),
       addFolderBtn: document.getElementById("addFolderBtn"),
@@ -408,6 +459,12 @@
       chatSettings: document.getElementById("chatSettings"),
       leftName: document.getElementById("leftName"),
       rightName: document.getElementById("rightName"),
+      chatComposer: document.getElementById("chatComposer"),
+      chatSide: document.getElementById("chatSide"),
+      chatInput: document.getElementById("chatInput"),
+      addChatBtn: document.getElementById("addChatBtn"),
+      clearChatBtn: document.getElementById("clearChatBtn"),
+      chatList: document.getElementById("chatList"),
       content: document.getElementById("content"),
       preview: document.getElementById("preview"),
       saveBtn: document.getElementById("saveBtn"),
@@ -436,15 +493,71 @@
 
     function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
 
-    function applyTheme(color) {
-      document.documentElement.style.setProperty("--theme-color", color);
-      localStorage.setItem(THEME_KEY, color);
-      els.themePicker.value = color;
+    function getDefaultTheme() {
+      return {
+        themeColor: "#4f46e5",
+        bg: "#ffffff",
+        card: "#ffffff",
+        text: "#37352f",
+        bubbleLeft: "#ffffff",
+        bubbleRight: "#e6e9ff"
+      };
+    }
+
+    function applyTheme(settings) {
+      document.documentElement.style.setProperty("--theme-color", settings.themeColor);
+      document.documentElement.style.setProperty("--bg", settings.bg);
+      document.documentElement.style.setProperty("--card-bg", settings.card);
+      document.documentElement.style.setProperty("--text", settings.text);
+      document.documentElement.style.setProperty("--bubble-left-bg", settings.bubbleLeft);
+      document.documentElement.style.setProperty("--bubble-right-bg", settings.bubbleRight);
+
+      els.themePicker.value = settings.themeColor;
+      els.bgPicker.value = settings.bg;
+      els.cardPicker.value = settings.card;
+      els.textPicker.value = settings.text;
+      els.leftBubblePicker.value = settings.bubbleLeft;
+      els.rightBubblePicker.value = settings.bubbleRight;
+    }
+
+    function readThemeFromInputs() {
+      return {
+        themeColor: els.themePicker.value,
+        bg: els.bgPicker.value,
+        card: els.cardPicker.value,
+        text: els.textPicker.value,
+        bubbleLeft: els.leftBubblePicker.value,
+        bubbleRight: els.rightBubblePicker.value
+      };
+    }
+
+    function saveTheme() {
+      const next = readThemeFromInputs();
+      applyTheme(next);
+      localStorage.setItem(THEME_KEY, JSON.stringify(next));
     }
 
     function initTheme() {
-      applyTheme(localStorage.getItem(THEME_KEY) || "#4f46e5");
-      els.themePicker.addEventListener("input", (e) => applyTheme(e.target.value));
+      const raw = localStorage.getItem(THEME_KEY);
+      const defaults = getDefaultTheme();
+      let theme = defaults;
+
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          theme = { ...defaults, ...parsed };
+        } catch {
+          theme = { ...defaults, themeColor: raw };
+        }
+      }
+
+      applyTheme(theme);
+      els.themePicker.addEventListener("input", saveTheme);
+      els.bgPicker.addEventListener("input", saveTheme);
+      els.cardPicker.addEventListener("input", saveTheme);
+      els.textPicker.addEventListener("input", saveTheme);
+      els.leftBubblePicker.addEventListener("input", saveTheme);
+      els.rightBubblePicker.addEventListener("input", saveTheme);
     }
 
     function getNode(id) { return state.data.nodes[id]; }
@@ -484,7 +597,8 @@
         name,
         format: "chat",
         content: "",
-        chatSettings: { leftName: "나", rightName: "AI" }
+        chatSettings: { leftName: "나", rightName: "AI" },
+        chatMessages: []
       };
       parent.children.push(id);
       state.selectedId = id;
@@ -582,6 +696,7 @@
         els.leftName.disabled = true;
         els.rightName.disabled = true;
         els.chatSettings.style.display = "none";
+        els.chatComposer.style.display = "none";
         els.saveBtn.disabled = true;
         els.preview.innerHTML = "<p class='subtle'>오른쪽 기능은 페이지 선택 시 활성화됩니다.</p>";
         return;
@@ -589,6 +704,9 @@
 
       if (!node.chatSettings) {
         node.chatSettings = { leftName: "나", rightName: "AI" };
+      }
+      if (!Array.isArray(node.chatMessages)) {
+        node.chatMessages = [];
       }
 
       els.currentTarget.textContent = node.name;
@@ -600,6 +718,7 @@
       els.rightName.value = node.chatSettings.rightName || "AI";
       els.content.value = node.content || "";
       toggleChatSettings();
+      renderChatList();
       updatePreview();
     }
 
@@ -617,23 +736,69 @@
       alert("저장되었습니다.");
     }
 
-    function parseChat(content) {
-      return content.split("\n").filter(Boolean).map((line, index) => {
-        const idx = line.indexOf(":");
-        if (idx === -1) {
-          return { side: index % 2 === 0 ? "left" : "right", message: line };
-        }
-        const sideToken = line.slice(0, idx).trim().toLowerCase();
-        const side = sideToken === "r" || sideToken === "right" ? "right" : "left";
-        return { side, message: line.slice(idx + 1).trim() };
-      });
-    }
-
     function toggleChatSettings() {
       const isChat = els.pageType.value === "chat";
       els.chatSettings.style.display = isChat ? "grid" : "none";
       els.leftName.disabled = !isChat;
       els.rightName.disabled = !isChat;
+      els.chatComposer.style.display = isChat ? "block" : "none";
+      els.content.style.display = isChat ? "none" : "block";
+    }
+
+    function addChatMessage() {
+      const node = getSelectedNode();
+      if (!node || node.type !== "page" || els.pageType.value !== "chat") return;
+      const message = els.chatInput.value.trim();
+      if (!message) return;
+
+      if (!Array.isArray(node.chatMessages)) node.chatMessages = [];
+      node.chatMessages.push({ side: els.chatSide.value, message });
+      els.chatInput.value = "";
+      saveData();
+      renderChatList();
+      updatePreview();
+    }
+
+    function removeChatMessage(index) {
+      const node = getSelectedNode();
+      if (!node || !Array.isArray(node.chatMessages)) return;
+      node.chatMessages.splice(index, 1);
+      saveData();
+      renderChatList();
+      updatePreview();
+    }
+
+    function clearChatMessages() {
+      const node = getSelectedNode();
+      if (!node || !Array.isArray(node.chatMessages)) return;
+      if (!confirm("대화 로그를 전체 삭제할까요?")) return;
+      node.chatMessages = [];
+      saveData();
+      renderChatList();
+      updatePreview();
+    }
+
+    function renderChatList() {
+      const node = getSelectedNode();
+      if (!node || node.type !== "page" || els.pageType.value !== "chat") {
+        els.chatList.innerHTML = "";
+        return;
+      }
+
+      const messages = Array.isArray(node.chatMessages) ? node.chatMessages : [];
+      if (!messages.length) {
+        els.chatList.innerHTML = "<p class='subtle'>왼쪽/오른쪽으로 대화를 추가해보세요.</p>";
+        return;
+      }
+
+      els.chatList.innerHTML = messages.map((row, index) => `
+        <div class="row" style="justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding:6px 0;">
+          <div style="font-size:13px;">
+            <strong>${row.side === "right" ? "오른쪽" : "왼쪽"}</strong>: ${escapeHtml(row.message)}
+          </div>
+          <button type="button" class="danger" data-remove-chat="${index}" style="padding:4px 8px;">삭제</button>
+        </div>
+      `).join("");
     }
 
     function updatePreview() {
@@ -653,9 +818,9 @@
       const node = getSelectedNode();
       const leftName = node?.chatSettings?.leftName?.trim() || "나";
       const rightName = node?.chatSettings?.rightName?.trim() || "AI";
-      const rows = parseChat(content);
+      const rows = Array.isArray(node?.chatMessages) ? node.chatMessages : [];
       if (!rows.length) {
-        els.preview.innerHTML = "<p class='subtle'>예시) l: 안녕 / r: 반가워</p>";
+        els.preview.innerHTML = "<p class='subtle'>왼쪽/오른쪽 대화를 추가하면 말풍선으로 미리보기됩니다.</p>";
         return;
       }
 
@@ -682,8 +847,22 @@
       els.saveBtn.addEventListener("click", saveCurrentPage);
       els.deleteBtn.addEventListener("click", deleteSelected);
       els.content.addEventListener("input", updatePreview);
+      els.addChatBtn.addEventListener("click", addChatMessage);
+      els.clearChatBtn.addEventListener("click", clearChatMessages);
+      els.chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addChatMessage();
+        }
+      });
+      els.chatList.addEventListener("click", (e) => {
+        const target = e.target.closest("[data-remove-chat]");
+        if (!target) return;
+        removeChatMessage(Number(target.getAttribute("data-remove-chat")));
+      });
       els.pageType.addEventListener("change", () => {
         toggleChatSettings();
+        renderChatList();
         updatePreview();
       });
       els.leftName.addEventListener("input", updatePreview);
