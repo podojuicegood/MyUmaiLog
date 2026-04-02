@@ -1,622 +1,713 @@
-<!DOCTYPE html>
-<html>
-<html lang="ko">
-<head>
-  <title>My Site</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Umai Log</title>
-  <style>
-    :root {
-      --theme-color: #4f46e5;
-      --bg: #ffffff;
-      --panel: #fbfbfa;
-      --panel-2: #f7f7f5;
-      --text: #37352f;
-      --muted: #787774;
-      --line: #ecebe8;
-      --danger: #e03e3e;
-      --radius: 10px;
-      --shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Inter, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .app {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 290px 1fr;
-    }
-
-    .sidebar {
-      border-right: 1px solid var(--line);
-      background: var(--panel);
-      padding: 18px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .logo {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      padding: 6px 10px;
-      border-radius: 8px;
-      color: var(--text);
-    }
-
-    .logo span {
-      color: var(--theme-color);
-    }
-
-    .section {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 10px;
-    }
-
-    .label {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 600;
-      margin-bottom: 7px;
-    }
-
-    .subtle {
-      font-size: 12px;
-      color: var(--muted);
-      margin: 6px 0 0;
-      line-height: 1.4;
-    }
-
-    input[type="text"], textarea, select {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 14px;
-      color: var(--text);
-      background: #fff;
-      font-family: inherit;
-      outline: none;
-    }
-
-    input[type="text"]:focus, textarea:focus, select:focus {
-      border-color: color-mix(in srgb, var(--theme-color) 70%, #fff);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 16%, transparent);
-    }
-
-    .row { display: flex; gap: 8px; }
-
-    button {
-      border: 1px solid transparent;
-      background: var(--theme-color);
-      color: #fff;
-      border-radius: 8px;
-      padding: 9px 11px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    button:hover { filter: brightness(0.96); }
-    button:disabled { opacity: 0.45; cursor: not-allowed; }
-
-    button.ghost {
-      background: #fff;
-      color: var(--text);
-      border-color: var(--line);
-    }
-
-    button.danger {
-      background: #fff;
-      border-color: color-mix(in srgb, var(--danger) 55%, #fff);
-      color: var(--danger);
-    }
-
-    .tree-shell {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: #fff;
-      padding: 8px;
-      min-height: 240px;
-      max-height: 360px;
-      overflow: auto;
-    }
-
-    .tree ul {
-      list-style: none;
-      margin: 4px 0 0 13px;
-      padding: 0;
-      border-left: 1px dashed #dfddd8;
-    }
-
-    .tree-node { margin: 3px 0; padding-left: 8px; }
-
-    .tree-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 6px 8px;
-      border-radius: 7px;
-      font-size: 14px;
-      color: #4d4b47;
-      cursor: pointer;
-      transition: background 0.12s;
-    }
-
-    .tree-item:hover { background: var(--panel-2); }
-
-    .tree-item.active {
-      background: color-mix(in srgb, var(--theme-color) 12%, white);
-      color: var(--theme-color);
-      font-weight: 600;
-    }
-
-    .main {
-      padding: 24px 28px;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 10px;
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 12px;
-    }
-
-    .title {
-      margin: 0;
-      font-size: 28px;
-      letter-spacing: -0.02em;
-    }
-
-    .desc {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .editor {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      background: #fff;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      flex: 1;
-    }
-
-    .editor-head {
-      background: var(--panel);
-      border-bottom: 1px solid var(--line);
-      padding: 12px;
-      display: flex;
-      gap: 10px;
-      align-items: end;
-      flex-wrap: wrap;
-    }
-
-    .editor-body {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      min-height: 420px;
-      flex: 1;
-    }
-
-    .pane {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .pane + .pane {
-      border-left: 1px solid var(--line);
-      background: #fcfcfb;
-    }
-
-    textarea {
-      min-height: 360px;
-      resize: vertical;
-      border-radius: 10px;
-      line-height: 1.55;
-    }
-
-    .preview {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 12px;
-      min-height: 360px;
-      background: #fff;
-      overflow: auto;
-    }
-
-    .chat-line {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 9px;
-      margin-bottom: 8px;
-    }
-
-    .chat-line .role {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--theme-color);
-      background: color-mix(in srgb, var(--theme-color) 12%, white);
-      margin-bottom: 6px;
-    }
-
-    .emoji { width: 18px; text-align: center; }
-
-    @media (max-width: 980px) {
-      .app { grid-template-columns: 1fr; }
-      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
-      .main { padding: 14px; }
-      .editor-body { grid-template-columns: 1fr; }
-      .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
-    }
-  </style>
-</head>
-<body>
-  <h1>Hello World 👋</h1>
-  <p>내 첫 깃허브 사이트</p>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="logo">🍜 <span>Umai</span> Log</div>
-
-      <section class="section">
-        <div class="label">테마 색상</div>
-        <input id="themePicker" type="color" value="#4f46e5" />
-      </section>
-
-      <section class="section">
-        <div class="label">새 폴더</div>
-        <div class="row">
-          <input id="folderName" type="text" placeholder="예: 프로젝트 A" />
-          <button id="addFolderBtn">추가</button>
-        </div>
-        <p class="subtle">현재 선택한 폴더 아래에 하위 폴더가 생성됩니다.</p>
-      </section>
-
-      <section class="section">
-        <div class="label">새 페이지</div>
-        <div class="row">
-          <input id="pageName" type="text" placeholder="예: 2026-04-02 회의" />
-          <button id="addPageBtn">생성</button>
-        </div>
-      </section>
-
-      <section>
-        <div class="label">폴더 / 페이지</div>
-        <div class="tree-shell">
-          <div id="tree" class="tree"></div>
-        </div>
-      </section>
-    </aside>
-
-    <main class="main">
-      <header class="top">
-        <div>
-          <h1 id="currentTarget" class="title">페이지를 선택하거나 생성하세요</h1>
-          <p class="desc">노션 스타일로 기록하고, 채팅/텍스트/HTML 형식으로 저장해 보세요.</p>
-        </div>
-      </header>
-
-      <section class="editor">
-        <div class="editor-head">
-          <div style="min-width: 220px; flex: 1;">
-            <div class="label">저장 형식</div>
-            <select id="pageType">
-              <option value="chat">대화형식 (role: 내용)</option>
-              <option value="text">일반 텍스트</option>
-              <option value="html">HTML</option>
-            </select>
-          </div>
-          <div class="row">
-            <button id="saveBtn">저장</button>
-            <button id="deleteBtn" class="danger">삭제</button>
-          </div>
-        </div>
-
-        <div class="editor-body">
-          <div class="pane">
-            <div class="label">내용</div>
-            <textarea id="content" placeholder="내용을 입력하세요."></textarea>
-          </div>
-          <div class="pane">
-            <div class="label">미리보기</div>
-            <div id="preview" class="preview"></div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script>
-    const STORAGE_KEY = "umai-log-data-v1";
-    const THEME_KEY = "umai-log-theme-color";
-
-    const els = {
-      themePicker: document.getElementById("themePicker"),
-      folderName: document.getElementById("folderName"),
-      pageName: document.getElementById("pageName"),
-      addFolderBtn: document.getElementById("addFolderBtn"),
-      addPageBtn: document.getElementById("addPageBtn"),
-      tree: document.getElementById("tree"),
-      currentTarget: document.getElementById("currentTarget"),
-      pageType: document.getElementById("pageType"),
-      content: document.getElementById("content"),
-      preview: document.getElementById("preview"),
-      saveBtn: document.getElementById("saveBtn"),
-      deleteBtn: document.getElementById("deleteBtn")
-    };
-
-    const state = { selectedId: null, data: loadData() };
-
-    function createId(prefix) {
-      return `${prefix}-${Math.random().toString(36).slice(2, 9)}-${Date.now().toString(36)}`;
-    }
-
-    function defaultData() {
-      const rootId = createId("folder");
-      return {
-        rootId,
-        nodes: { [rootId]: { id: rootId, type: "folder", name: "내 로그", children: [] } }
-      };
-    }
-
-    function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return defaultData();
-      try { return JSON.parse(raw); } catch { return defaultData(); }
-    }
-
-    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
-
-    function applyTheme(color) {
-      document.documentElement.style.setProperty("--theme-color", color);
-      localStorage.setItem(THEME_KEY, color);
-      els.themePicker.value = color;
-    }
-
-    function initTheme() {
-      applyTheme(localStorage.getItem(THEME_KEY) || "#4f46e5");
-      els.themePicker.addEventListener("input", (e) => applyTheme(e.target.value));
-    }
-
-    function getNode(id) { return state.data.nodes[id]; }
-    function getSelectedNode() { return state.selectedId ? getNode(state.selectedId) : null; }
-
-    function ensureSelectedFolder() {
-      const selected = getSelectedNode();
-      if (!selected) return getNode(state.data.rootId);
-      if (selected.type === "folder") return selected;
-      return null;
-    }
-
-    function addFolder() {
-      const name = els.folderName.value.trim();
-      if (!name) return alert("폴더 이름을 입력해주세요.");
-      const parent = ensureSelectedFolder();
-      if (!parent) return alert("폴더를 선택한 상태에서 하위 폴더를 생성할 수 있어요.");
-
-      const id = createId("folder");
-      state.data.nodes[id] = { id, type: "folder", name, children: [] };
-      parent.children.push(id);
-      saveData();
-      els.folderName.value = "";
-      renderTree();
-    }
-
-    function addPage() {
-      const name = els.pageName.value.trim();
-      if (!name) return alert("페이지 이름을 입력해주세요.");
-      const parent = ensureSelectedFolder();
-      if (!parent) return alert("페이지를 만들 폴더를 먼저 선택해주세요.");
-
-      const id = createId("page");
-      state.data.nodes[id] = { id, type: "page", name, format: "chat", content: "" };
-      parent.children.push(id);
-      state.selectedId = id;
-      saveData();
-      els.pageName.value = "";
-      renderTree();
-      renderEditor();
-    }
-
-    function deleteSelected() {
-      const node = getSelectedNode();
-      if (!node) return;
-      if (node.id === state.data.rootId) return alert("루트 폴더는 삭제할 수 없습니다.");
-
-      if (!confirm(`정말 '${node.name}'을(를) 삭제할까요? 하위 내용도 함께 삭제됩니다.`)) return;
-
-      const parentId = findParent(state.data.rootId, node.id);
-      if (parentId) {
-        const parent = getNode(parentId);
-        parent.children = parent.children.filter((id) => id !== node.id);
-      }
-      removeNodeRecursive(node.id);
-      state.selectedId = null;
-      saveData();
-      renderTree();
-      renderEditor();
-    }
-
-    function removeNodeRecursive(id) {
-      const node = getNode(id);
-      if (!node) return;
-      if (node.type === "folder") node.children.forEach(removeNodeRecursive);
-      delete state.data.nodes[id];
-    }
-
-    function findParent(currentId, targetId) {
-      const current = getNode(currentId);
-      if (!current || current.type !== "folder") return null;
-      if (current.children.includes(targetId)) return current.id;
-
-      for (const childId of current.children) {
-        const child = getNode(childId);
-        if (child?.type === "folder") {
-          const found = findParent(childId, targetId);
-          if (found) return found;
-        }
-      }
-      return null;
-    }
-
-    function renderTree() {
-      const root = getNode(state.data.rootId);
-      els.tree.innerHTML = "";
-      els.tree.appendChild(renderNode(root));
-    }
-
-    function renderNode(node) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "tree-node";
-
-      const item = document.createElement("div");
-      item.className = `tree-item ${state.selectedId === node.id ? "active" : ""}`;
-      item.innerHTML = `<span class="emoji">${node.type === "folder" ? "📁" : "📝"}</span><span>${escapeHtml(node.name)}</span>`;
-      item.onclick = () => {
-        state.selectedId = node.id;
-        renderTree();
-        renderEditor();
-      };
-      wrapper.appendChild(item);
-
-      if (node.type === "folder" && node.children.length) {
-        const ul = document.createElement("ul");
-        node.children.forEach((childId) => {
-          const child = getNode(childId);
-          if (!child) return;
-          const li = document.createElement("li");
-          li.appendChild(renderNode(child));
-          ul.appendChild(li);
-        });
-        wrapper.appendChild(ul);
-      }
-      return wrapper;
-    }
-
-    function renderEditor() {
-      const node = getSelectedNode();
-      if (!node || node.type !== "page") {
-        els.currentTarget.textContent = "페이지를 선택하거나 생성하세요";
-        els.pageType.value = "chat";
-        els.content.value = "";
-        els.content.disabled = true;
-        els.pageType.disabled = true;
-        els.saveBtn.disabled = true;
-        els.preview.innerHTML = "<p class='subtle'>오른쪽 기능은 페이지 선택 시 활성화됩니다.</p>";
-        return;
-      }
-
-      els.currentTarget.textContent = node.name;
-      els.pageType.disabled = false;
-      els.content.disabled = false;
-      els.saveBtn.disabled = false;
-      els.pageType.value = node.format || "chat";
-      els.content.value = node.content || "";
-      updatePreview();
-    }
-
-    function saveCurrentPage() {
-      const node = getSelectedNode();
-      if (!node || node.type !== "page") return;
-      node.format = els.pageType.value;
-      node.content = els.content.value;
-      saveData();
-      updatePreview();
-      alert("저장되었습니다.");
-    }
-
-    function parseChat(content) {
-      return content.split("\n").filter(Boolean).map((line) => {
-        const idx = line.indexOf(":");
-        if (idx === -1) return { role: "text", message: line };
-        return { role: line.slice(0, idx).trim() || "user", message: line.slice(idx + 1).trim() };
-      });
-    }
-
-    function updatePreview() {
-      const format = els.pageType.value;
-      const content = els.content.value;
-
-      if (format === "text") {
-        els.preview.innerHTML = `<pre style="white-space: pre-wrap; margin:0; line-height:1.55;">${escapeHtml(content)}</pre>`;
-        return;
-      }
-
-      if (format === "html") {
-        els.preview.innerHTML = content || "<p class='subtle'>HTML을 입력하면 여기에서 렌더링됩니다.</p>";
-        return;
-      }
-
-      const rows = parseChat(content);
-      if (!rows.length) {
-        els.preview.innerHTML = "<p class='subtle'>예시) user: 질문 / assistant: 답변</p>";
-        return;
-      }
-
-      els.preview.innerHTML = rows.map((row) => `
-        <div class="chat-line">
-          <div class="role">${escapeHtml(row.role)}</div>
-          <div>${escapeHtml(row.message)}</div>
-        </div>
-      `).join("");
-    }
-
-    function escapeHtml(value) {
-      return value
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
-    }
-
-    function bindEvents() {
-      els.addFolderBtn.addEventListener("click", addFolder);
-      els.addPageBtn.addEventListener("click", addPage);
-      els.saveBtn.addEventListener("click", saveCurrentPage);
-      els.deleteBtn.addEventListener("click", deleteSelected);
-      els.content.addEventListener("input", updatePreview);
-      els.pageType.addEventListener("change", updatePreview);
-    }
-
-    function init() {
-      initTheme();
-      bindEvents();
-      state.selectedId = state.data.rootId;
-      renderTree();
-      renderEditor();
-    }
-
-    init();
-  </script>
-</body>
-</html>
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/index.html b/index.html
+index 1c3fa75dc65fc8d4f4434e1e80c38dfee431952c..3ed8ed55dfe03f5baf0947943af564f004cb2de7 100644
+--- a/index.html
++++ b/index.html
+@@ -1,10 +1,700 @@
+ <!DOCTYPE html>
+-<html>
++<html lang="ko">
+ <head>
+-  <title>My Site</title>
++  <meta charset="UTF-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++  <title>Umai Log</title>
++  <style>
++    :root {
++      --theme-color: #4f46e5;
++      --bg: #ffffff;
++      --panel: #fbfbfa;
++      --panel-2: #f7f7f5;
++      --text: #37352f;
++      --muted: #787774;
++      --line: #ecebe8;
++      --danger: #e03e3e;
++      --radius: 10px;
++      --shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
++    }
++
++    * { box-sizing: border-box; }
++
++    body {
++      margin: 0;
++      font-family: Inter, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
++      background: var(--bg);
++      color: var(--text);
++    }
++
++    .app {
++      min-height: 100vh;
++      display: grid;
++      grid-template-columns: 290px 1fr;
++    }
++
++    .sidebar {
++      border-right: 1px solid var(--line);
++      background: var(--panel);
++      padding: 18px 14px;
++      display: flex;
++      flex-direction: column;
++      gap: 12px;
++    }
++
++    .logo {
++      font-size: 18px;
++      font-weight: 700;
++      letter-spacing: -0.02em;
++      padding: 6px 10px;
++      border-radius: 8px;
++      color: var(--text);
++    }
++
++    .logo span {
++      color: var(--theme-color);
++    }
++
++    .section {
++      background: #fff;
++      border: 1px solid var(--line);
++      border-radius: var(--radius);
++      padding: 10px;
++    }
++
++    .label {
++      font-size: 12px;
++      color: var(--muted);
++      font-weight: 600;
++      margin-bottom: 7px;
++    }
++
++    .subtle {
++      font-size: 12px;
++      color: var(--muted);
++      margin: 6px 0 0;
++      line-height: 1.4;
++    }
++
++    input[type="text"], textarea, select {
++      width: 100%;
++      border: 1px solid var(--line);
++      border-radius: 8px;
++      padding: 10px;
++      font-size: 14px;
++      color: var(--text);
++      background: #fff;
++      font-family: inherit;
++      outline: none;
++    }
++
++    input[type="text"]:focus, textarea:focus, select:focus {
++      border-color: color-mix(in srgb, var(--theme-color) 70%, #fff);
++      box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 16%, transparent);
++    }
++
++    .row { display: flex; gap: 8px; }
++
++    button {
++      border: 1px solid transparent;
++      background: var(--theme-color);
++      color: #fff;
++      border-radius: 8px;
++      padding: 9px 11px;
++      font-size: 13px;
++      font-weight: 600;
++      cursor: pointer;
++      transition: 0.15s ease;
++    }
++
++    button:hover { filter: brightness(0.96); }
++    button:disabled { opacity: 0.45; cursor: not-allowed; }
++
++    button.ghost {
++      background: #fff;
++      color: var(--text);
++      border-color: var(--line);
++    }
++
++    button.danger {
++      background: #fff;
++      border-color: color-mix(in srgb, var(--danger) 55%, #fff);
++      color: var(--danger);
++    }
++
++    .tree-shell {
++      border: 1px solid var(--line);
++      border-radius: var(--radius);
++      background: #fff;
++      padding: 8px;
++      min-height: 240px;
++      max-height: 360px;
++      overflow: auto;
++    }
++
++    .tree ul {
++      list-style: none;
++      margin: 4px 0 0 13px;
++      padding: 0;
++      border-left: 1px dashed #dfddd8;
++    }
++
++    .tree-node { margin: 3px 0; padding-left: 8px; }
++
++    .tree-item {
++      display: flex;
++      align-items: center;
++      gap: 7px;
++      padding: 6px 8px;
++      border-radius: 7px;
++      font-size: 14px;
++      color: #4d4b47;
++      cursor: pointer;
++      transition: background 0.12s;
++    }
++
++    .tree-item:hover { background: var(--panel-2); }
++
++    .tree-item.active {
++      background: color-mix(in srgb, var(--theme-color) 12%, white);
++      color: var(--theme-color);
++      font-weight: 600;
++    }
++
++    .main {
++      padding: 24px 28px;
++      background: #fff;
++      display: flex;
++      flex-direction: column;
++      gap: 16px;
++    }
++
++    .top {
++      display: flex;
++      justify-content: space-between;
++      align-items: end;
++      gap: 10px;
++      border-bottom: 1px solid var(--line);
++      padding-bottom: 12px;
++    }
++
++    .title {
++      margin: 0;
++      font-size: 28px;
++      letter-spacing: -0.02em;
++    }
++
++    .desc {
++      margin: 5px 0 0;
++      color: var(--muted);
++      font-size: 13px;
++    }
++
++    .editor {
++      border: 1px solid var(--line);
++      border-radius: 12px;
++      box-shadow: var(--shadow);
++      background: #fff;
++      overflow: hidden;
++      display: flex;
++      flex-direction: column;
++      min-height: 0;
++      flex: 1;
++    }
++
++    .editor-head {
++      background: var(--panel);
++      border-bottom: 1px solid var(--line);
++      padding: 12px;
++      display: flex;
++      gap: 10px;
++      align-items: end;
++      flex-wrap: wrap;
++    }
++
++    .editor-body {
++      display: grid;
++      grid-template-columns: 1fr 1fr;
++      gap: 0;
++      min-height: 420px;
++      flex: 1;
++    }
++
++    .pane {
++      padding: 14px;
++      display: flex;
++      flex-direction: column;
++      gap: 8px;
++    }
++
++    .pane + .pane {
++      border-left: 1px solid var(--line);
++      background: #fcfcfb;
++    }
++
++    textarea {
++      min-height: 360px;
++      resize: vertical;
++      border-radius: 10px;
++      line-height: 1.55;
++    }
++
++    .preview {
++      border: 1px solid var(--line);
++      border-radius: 10px;
++      padding: 12px;
++      min-height: 360px;
++      background: #fff;
++      overflow: auto;
++    }
++
++    .chat-settings {
++      display: grid;
++      grid-template-columns: 1fr 1fr;
++      gap: 8px;
++      min-width: 280px;
++      flex: 1;
++    }
++
++    .chat-thread {
++      display: flex;
++      flex-direction: column;
++      gap: 8px;
++    }
++
++    .chat-row {
++      display: flex;
++      flex-direction: column;
++      max-width: 78%;
++      gap: 4px;
++    }
++
++    .chat-row.left { align-self: flex-start; }
++    .chat-row.right { align-self: flex-end; }
++
++    .chat-name {
++      font-size: 12px;
++      color: var(--muted);
++      font-weight: 600;
++    }
++
++    .chat-row.right .chat-name { text-align: right; }
++
++    .chat-bubble {
++      border: 1px solid var(--line);
++      border-radius: 14px;
++      padding: 10px 12px;
++      line-height: 1.5;
++      background: #fff;
++      word-break: break-word;
++    }
++
++    .chat-row.right .chat-bubble {
++      background: color-mix(in srgb, var(--theme-color) 14%, white);
++      border-color: color-mix(in srgb, var(--theme-color) 28%, white);
++    }
++
++    .emoji { width: 18px; text-align: center; }
++
++    @media (max-width: 980px) {
++      .app { grid-template-columns: 1fr; }
++      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
++      .main { padding: 14px; }
++      .editor-body { grid-template-columns: 1fr; }
++      .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
++    }
++  </style>
+ </head>
+ <body>
+-  <h1>Hello World 👋</h1>
+-  <p>내 첫 깃허브 사이트</p>
++  <div class="app">
++    <aside class="sidebar">
++      <div class="logo">🍜 <span>Umai</span> Log</div>
++
++      <section class="section">
++        <div class="label">테마 색상</div>
++        <input id="themePicker" type="color" value="#4f46e5" />
++      </section>
++
++      <section class="section">
++        <div class="label">새 폴더</div>
++        <div class="row">
++          <input id="folderName" type="text" placeholder="예: 프로젝트 A" />
++          <button id="addFolderBtn">추가</button>
++        </div>
++        <p class="subtle">현재 선택한 폴더 아래에 하위 폴더가 생성됩니다.</p>
++      </section>
++
++      <section class="section">
++        <div class="label">새 페이지</div>
++        <div class="row">
++          <input id="pageName" type="text" placeholder="예: 2026-04-02 회의" />
++          <button id="addPageBtn">생성</button>
++        </div>
++      </section>
++
++      <section>
++        <div class="label">폴더 / 페이지</div>
++        <div class="tree-shell">
++          <div id="tree" class="tree"></div>
++        </div>
++      </section>
++    </aside>
++
++    <main class="main">
++      <header class="top">
++        <div>
++          <h1 id="currentTarget" class="title">페이지를 선택하거나 생성하세요</h1>
++          <p class="desc">노션 스타일로 기록하고, 채팅/텍스트/HTML 형식으로 저장해 보세요.</p>
++        </div>
++      </header>
++
++      <section class="editor">
++        <div class="editor-head">
++          <div style="min-width: 220px; flex: 1;">
++            <div class="label">저장 형식</div>
++            <select id="pageType">
++              <option value="chat">대화형식 (role: 내용)</option>
++              <option value="text">일반 텍스트</option>
++              <option value="html">HTML</option>
++            </select>
++          </div>
++          <div id="chatSettings" class="chat-settings">
++            <div>
++              <div class="label">왼쪽 캐릭터 이름</div>
++              <input id="leftName" type="text" placeholder="예: 나" />
++            </div>
++            <div>
++              <div class="label">오른쪽 캐릭터 이름</div>
++              <input id="rightName" type="text" placeholder="예: AI" />
++            </div>
++          </div>
++          <div class="row">
++            <button id="saveBtn">저장</button>
++            <button id="deleteBtn" class="danger">삭제</button>
++          </div>
++        </div>
++
++        <div class="editor-body">
++          <div class="pane">
++            <div class="label">내용</div>
++            <textarea id="content" placeholder="내용을 입력하세요."></textarea>
++          </div>
++          <div class="pane">
++            <div class="label">미리보기</div>
++            <div id="preview" class="preview"></div>
++          </div>
++        </div>
++      </section>
++    </main>
++  </div>
++
++  <script>
++    const STORAGE_KEY = "umai-log-data-v1";
++    const THEME_KEY = "umai-log-theme-color";
++
++    const els = {
++      themePicker: document.getElementById("themePicker"),
++      folderName: document.getElementById("folderName"),
++      pageName: document.getElementById("pageName"),
++      addFolderBtn: document.getElementById("addFolderBtn"),
++      addPageBtn: document.getElementById("addPageBtn"),
++      tree: document.getElementById("tree"),
++      currentTarget: document.getElementById("currentTarget"),
++      pageType: document.getElementById("pageType"),
++      chatSettings: document.getElementById("chatSettings"),
++      leftName: document.getElementById("leftName"),
++      rightName: document.getElementById("rightName"),
++      content: document.getElementById("content"),
++      preview: document.getElementById("preview"),
++      saveBtn: document.getElementById("saveBtn"),
++      deleteBtn: document.getElementById("deleteBtn")
++    };
++
++    const state = { selectedId: null, data: loadData() };
++
++    function createId(prefix) {
++      return `${prefix}-${Math.random().toString(36).slice(2, 9)}-${Date.now().toString(36)}`;
++    }
++
++    function defaultData() {
++      const rootId = createId("folder");
++      return {
++        rootId,
++        nodes: { [rootId]: { id: rootId, type: "folder", name: "내 로그", children: [] } }
++      };
++    }
++
++    function loadData() {
++      const raw = localStorage.getItem(STORAGE_KEY);
++      if (!raw) return defaultData();
++      try { return JSON.parse(raw); } catch { return defaultData(); }
++    }
++
++    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
++
++    function applyTheme(color) {
++      document.documentElement.style.setProperty("--theme-color", color);
++      localStorage.setItem(THEME_KEY, color);
++      els.themePicker.value = color;
++    }
++
++    function initTheme() {
++      applyTheme(localStorage.getItem(THEME_KEY) || "#4f46e5");
++      els.themePicker.addEventListener("input", (e) => applyTheme(e.target.value));
++    }
++
++    function getNode(id) { return state.data.nodes[id]; }
++    function getSelectedNode() { return state.selectedId ? getNode(state.selectedId) : null; }
++
++    function ensureSelectedFolder() {
++      const selected = getSelectedNode();
++      if (!selected) return getNode(state.data.rootId);
++      if (selected.type === "folder") return selected;
++      return null;
++    }
++
++    function addFolder() {
++      const name = els.folderName.value.trim();
++      if (!name) return alert("폴더 이름을 입력해주세요.");
++      const parent = ensureSelectedFolder();
++      if (!parent) return alert("폴더를 선택한 상태에서 하위 폴더를 생성할 수 있어요.");
++
++      const id = createId("folder");
++      state.data.nodes[id] = { id, type: "folder", name, children: [] };
++      parent.children.push(id);
++      saveData();
++      els.folderName.value = "";
++      renderTree();
++    }
++
++    function addPage() {
++      const name = els.pageName.value.trim();
++      if (!name) return alert("페이지 이름을 입력해주세요.");
++      const parent = ensureSelectedFolder();
++      if (!parent) return alert("페이지를 만들 폴더를 먼저 선택해주세요.");
++
++      const id = createId("page");
++      state.data.nodes[id] = {
++        id,
++        type: "page",
++        name,
++        format: "chat",
++        content: "",
++        chatSettings: { leftName: "나", rightName: "AI" }
++      };
++      parent.children.push(id);
++      state.selectedId = id;
++      saveData();
++      els.pageName.value = "";
++      renderTree();
++      renderEditor();
++    }
++
++    function deleteSelected() {
++      const node = getSelectedNode();
++      if (!node) return;
++      if (node.id === state.data.rootId) return alert("루트 폴더는 삭제할 수 없습니다.");
++
++      if (!confirm(`정말 '${node.name}'을(를) 삭제할까요? 하위 내용도 함께 삭제됩니다.`)) return;
++
++      const parentId = findParent(state.data.rootId, node.id);
++      if (parentId) {
++        const parent = getNode(parentId);
++        parent.children = parent.children.filter((id) => id !== node.id);
++      }
++      removeNodeRecursive(node.id);
++      state.selectedId = null;
++      saveData();
++      renderTree();
++      renderEditor();
++    }
++
++    function removeNodeRecursive(id) {
++      const node = getNode(id);
++      if (!node) return;
++      if (node.type === "folder") node.children.forEach(removeNodeRecursive);
++      delete state.data.nodes[id];
++    }
++
++    function findParent(currentId, targetId) {
++      const current = getNode(currentId);
++      if (!current || current.type !== "folder") return null;
++      if (current.children.includes(targetId)) return current.id;
++
++      for (const childId of current.children) {
++        const child = getNode(childId);
++        if (child?.type === "folder") {
++          const found = findParent(childId, targetId);
++          if (found) return found;
++        }
++      }
++      return null;
++    }
++
++    function renderTree() {
++      const root = getNode(state.data.rootId);
++      els.tree.innerHTML = "";
++      els.tree.appendChild(renderNode(root));
++    }
++
++    function renderNode(node) {
++      const wrapper = document.createElement("div");
++      wrapper.className = "tree-node";
++
++      const item = document.createElement("div");
++      item.className = `tree-item ${state.selectedId === node.id ? "active" : ""}`;
++      item.innerHTML = `<span class="emoji">${node.type === "folder" ? "📁" : "📝"}</span><span>${escapeHtml(node.name)}</span>`;
++      item.onclick = () => {
++        state.selectedId = node.id;
++        renderTree();
++        renderEditor();
++      };
++      wrapper.appendChild(item);
++
++      if (node.type === "folder" && node.children.length) {
++        const ul = document.createElement("ul");
++        node.children.forEach((childId) => {
++          const child = getNode(childId);
++          if (!child) return;
++          const li = document.createElement("li");
++          li.appendChild(renderNode(child));
++          ul.appendChild(li);
++        });
++        wrapper.appendChild(ul);
++      }
++      return wrapper;
++    }
++
++    function renderEditor() {
++      const node = getSelectedNode();
++      if (!node || node.type !== "page") {
++        els.currentTarget.textContent = "페이지를 선택하거나 생성하세요";
++        els.pageType.value = "chat";
++        els.content.value = "";
++        els.content.disabled = true;
++        els.pageType.disabled = true;
++        els.leftName.value = "";
++        els.rightName.value = "";
++        els.leftName.disabled = true;
++        els.rightName.disabled = true;
++        els.chatSettings.style.display = "none";
++        els.saveBtn.disabled = true;
++        els.preview.innerHTML = "<p class='subtle'>오른쪽 기능은 페이지 선택 시 활성화됩니다.</p>";
++        return;
++      }
++
++      if (!node.chatSettings) {
++        node.chatSettings = { leftName: "나", rightName: "AI" };
++      }
++
++      els.currentTarget.textContent = node.name;
++      els.pageType.disabled = false;
++      els.content.disabled = false;
++      els.saveBtn.disabled = false;
++      els.pageType.value = node.format || "chat";
++      els.leftName.value = node.chatSettings.leftName || "나";
++      els.rightName.value = node.chatSettings.rightName || "AI";
++      els.content.value = node.content || "";
++      toggleChatSettings();
++      updatePreview();
++    }
++
++    function saveCurrentPage() {
++      const node = getSelectedNode();
++      if (!node || node.type !== "page") return;
++      node.format = els.pageType.value;
++      node.content = els.content.value;
++      node.chatSettings = {
++        leftName: els.leftName.value.trim() || "나",
++        rightName: els.rightName.value.trim() || "AI"
++      };
++      saveData();
++      updatePreview();
++      alert("저장되었습니다.");
++    }
++
++    function parseChat(content) {
++      return content.split("\n").filter(Boolean).map((line, index) => {
++        const idx = line.indexOf(":");
++        if (idx === -1) {
++          return { side: index % 2 === 0 ? "left" : "right", message: line };
++        }
++        const sideToken = line.slice(0, idx).trim().toLowerCase();
++        const side = sideToken === "r" || sideToken === "right" ? "right" : "left";
++        return { side, message: line.slice(idx + 1).trim() };
++      });
++    }
++
++    function toggleChatSettings() {
++      const isChat = els.pageType.value === "chat";
++      els.chatSettings.style.display = isChat ? "grid" : "none";
++      els.leftName.disabled = !isChat;
++      els.rightName.disabled = !isChat;
++    }
++
++    function updatePreview() {
++      const format = els.pageType.value;
++      const content = els.content.value;
++
++      if (format === "text") {
++        els.preview.innerHTML = `<pre style="white-space: pre-wrap; margin:0; line-height:1.55;">${escapeHtml(content)}</pre>`;
++        return;
++      }
++
++      if (format === "html") {
++        els.preview.innerHTML = content || "<p class='subtle'>HTML을 입력하면 여기에서 렌더링됩니다.</p>";
++        return;
++      }
++
++      const node = getSelectedNode();
++      const leftName = node?.chatSettings?.leftName?.trim() || "나";
++      const rightName = node?.chatSettings?.rightName?.trim() || "AI";
++      const rows = parseChat(content);
++      if (!rows.length) {
++        els.preview.innerHTML = "<p class='subtle'>예시) l: 안녕 / r: 반가워</p>";
++        return;
++      }
++
++      els.preview.innerHTML = `<div class=\"chat-thread\">${rows.map((row) => `
++        <div class="chat-row ${row.side}">
++          <div class="chat-name">${escapeHtml(row.side === "right" ? rightName : leftName)}</div>
++          <div class="chat-bubble">${escapeHtml(row.message)}</div>
++        </div>
++      `).join("")}</div>`;
++    }
++
++    function escapeHtml(value) {
++      return value
++        .replaceAll("&", "&amp;")
++        .replaceAll("<", "&lt;")
++        .replaceAll(">", "&gt;")
++        .replaceAll('"', "&quot;")
++        .replaceAll("'", "&#39;");
++    }
++
++    function bindEvents() {
++      els.addFolderBtn.addEventListener("click", addFolder);
++      els.addPageBtn.addEventListener("click", addPage);
++      els.saveBtn.addEventListener("click", saveCurrentPage);
++      els.deleteBtn.addEventListener("click", deleteSelected);
++      els.content.addEventListener("input", updatePreview);
++      els.pageType.addEventListener("change", () => {
++        toggleChatSettings();
++        updatePreview();
++      });
++      els.leftName.addEventListener("input", updatePreview);
++      els.rightName.addEventListener("input", updatePreview);
++    }
++
++    function init() {
++      initTheme();
++      bindEvents();
++      state.selectedId = state.data.rootId;
++      renderTree();
++      renderEditor();
++    }
++
++    init();
++  </script>
+ </body>
+ </html>
+ 
+EOF
+)
